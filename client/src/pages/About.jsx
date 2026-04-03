@@ -129,7 +129,7 @@ const About = () => {
             transition={{ duration: 0.9, delay: 0.2 }}
             className="text-6xl md:text-8xl font-display font-bold mb-5 leading-tight"
           >
-            Our Story
+    
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -137,7 +137,6 @@ const About = () => {
             transition={{ duration: 0.9, delay: 0.45 }}
             className="text-lg text-white/70"
           >
-            Three decades of ocean-front luxury and heartfelt hospitality.
           </motion.p>
         </motion.div>
       </section>
@@ -187,7 +186,7 @@ const About = () => {
               </h2>
             </div>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Since opening our doors in 1995, Oceano Con Vista has been a beacon of luxury
+              Since opening our doors in 2019, Oceano Con Vista has been a beacon of luxury
               and tranquility on the pristine coastline. What began as a vision to create
               the perfect seaside retreat has blossomed into one of the world's most
               celebrated luxury resorts.

@@ -1,9 +1,27 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Waves } from 'lucide-react';
+import { CalendarCheck, Waves, Mountain } from 'lucide-react';
 import LoginForm from '../components/forms/LoginForm';
 import { useAuth } from '../context/AuthContext';
+
+const features = [
+  {
+    icon: CalendarCheck,
+    title: 'Easy Booking',
+    desc: 'Reserve your stay in just a few clicks.',
+  },
+  {
+    icon: Waves,
+    title: 'Pool Access',
+    desc: 'Enjoy our stunning infinity pool anytime.',
+  },
+  {
+    icon: Mountain,
+    title: 'Breathtaking Views',
+    desc: 'Wake up to panoramic ocean scenery.',
+  },
+];
 
 const Login = () => {
   const [error, setError] = useState('');
@@ -11,43 +29,40 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (formData) => {
-  setError('');
-  const result = await login(formData.email, formData.password);
-  
-  if (result.success) {
-    // Redirect based on role
-    if (result.user.role === 'admin') {
-      navigate('/admin');
-    } else if (result.user.role === 'staff') {
-      navigate('/staff');
+    setError('');
+    const result = await login(formData.email, formData.password);
+    
+    if (result.success) {
+      if (result.user.role === 'admin') {
+        navigate('/admin');
+      } else if (result.user.role === 'staff') {
+        navigate('/staff');
+      } else {
+        navigate('/dashboard');
+      }
     } else {
-      navigate('/dashboard'); // guest
+      setError(result.error);
     }
-  } else {
-    setError(result.error);
-  }
-};
-
+  };
 
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Image & Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-ocean-600 overflow-hidden">
-        {/* Background Image */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-ocean-300 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              'url(https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1200&q=80)',
-          }}
+          style={{ backgroundImage: 'url(/images/IMG_4542.jpg)' }}
         />
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-ocean-600/90 to-ocean-800/90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-ocean-600/60 to-ocean-800/90" />
 
-        {/* Content */}
         <div className="relative z-10 flex flex-col justify-between p-12 text-white">
+          {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <Waves className="w-10 h-10" />
+            <img
+              src="/images/logo3.png"
+              alt="Oceano Con Vista"
+              className="w-12 h-12 object-contain brightness-0 invert"
+            />
             <span className="text-3xl font-display font-bold">Oceano Con Vista</span>
           </Link>
 
@@ -60,15 +75,32 @@ const Login = () => {
             >
               Welcome Back to Paradise
             </motion.h1>
-            <motion.p
+
+            {/* 3 Resort Features */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl text-ocean-100"
+              className="space-y-4 pt-2"
             >
-              Sign in to access your bookings and continue your journey to
-              ultimate relaxation and luxury.
-            </motion.p>
+              {features.map(({ icon: Icon, title, desc }, i) => (
+                <motion.div
+                  key={title}
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
+                  className="flex items-center gap-4"
+                >
+                  <div className="flex-shrink-0 w-14 h-14 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                    <Icon size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-white">{title}</p>
+                    <p className="text-sm text-ocean-100">{desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
 
           <motion.div
@@ -88,7 +120,11 @@ const Login = () => {
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
             <Link to="/" className="inline-flex items-center space-x-3">
-              <Waves className="w-8 h-8 text-ocean-600" />
+              <img
+                src="/images/logo3.png"
+                alt="Oceano Con Vista"
+                className="w-8 h-8 object-contain"
+              />
               <span className="text-2xl font-display font-bold text-gray-900">
                 Oceano Con Vista
               </span>

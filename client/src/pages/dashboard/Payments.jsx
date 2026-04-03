@@ -1,209 +1,226 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, Download, CreditCard, Calendar, CheckCircle } from 'lucide-react';
+import { CreditCard, Calendar, CheckCircle } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
+import { bookingsAPI } from '../../services/api';
 import { Home as HomeIcon, Info, Bed, Image, Mail, BookOpen } from 'lucide-react';
 
 const publicMenuItems = [
-  { path: '/', label: 'Home', icon: HomeIcon },
-  { path: '/about', label: 'About', icon: Info },
-  { path: '/rooms', label: 'Rooms', icon: Bed },
-  { path: '/gallery', label: 'Gallery', icon: Image },
-  { path: '/contact', label: 'Contact', icon: Mail },
+  { path: '/',        label: 'Home',    icon: HomeIcon },
+  { path: '/about',   label: 'About',   icon: Info     },
+  { path: '/rooms',   label: 'Rooms',   icon: Bed      },
+  { path: '/gallery', label: 'Gallery', icon: Image    },
+  { path: '/contact', label: 'Contact', icon: Mail     },
 ];
 
 const dashboardMenuItems = [
-  { path: '/dashboard', label: 'Overview', icon: HomeIcon },
-  { path: '/dashboard/bookings', label: 'My Bookings', icon: BookOpen },
-  { path: '/dashboard/payments', label: 'Payments', icon: CreditCard },
+  { path: '/dashboard',          label: 'Overview',    icon: HomeIcon  },
+  { path: '/dashboard/bookings', label: 'My Bookings', icon: BookOpen  },
+  { path: '/dashboard/payments', label: 'Payments',    icon: CreditCard},
 ];
 
+const statusStyles = {
+  confirmed:     'bg-green-100 text-green-700',
+  pending:       'bg-yellow-100 text-yellow-700',
+  cancelled:     'bg-red-100 text-red-700',
+  'checked-in':  'bg-blue-100 text-blue-700',
+  'checked-out': 'bg-gray-100 text-gray-600',
+};
+
+const paymentLabel = {
+  full_payment:    'Full Payment',
+  partial_payment: 'Partial Payment',
+  pay_at_resort:   'Pay at Resort',
+};
+
 const Payments = () => {
-  // Mock data
-  const transactions = [
-    {
-      id: 'PAY-1001',
-      bookingId: 'BK-1001',
-      roomName: 'Ocean View Suite',
-      date: '2024-02-18',
-      amount: 1750,
-      status: 'completed',
-      method: 'Credit Card'
-    },
-    {
-      id: 'PAY-1002',
-      bookingId: 'BK-1002',
-      roomName: 'Deluxe Garden Room',
-      date: '2024-02-10',
-      amount: 1250,
-      status: 'completed',
-      method: 'PayPal'
-    },
-  ];
+  const [bookings, setBookings] = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
+
+  useEffect(() => {
+    bookingsAPI.getUserBookings()
+      .then(data => setBookings(data.bookings || []))
+      .catch(err  => setError(err.message))
+      .finally(()  => setLoading(false));
+  }, []);
+
+  const totalPaid = bookings
+    .filter(b => b.status !== 'cancelled')
+    .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+
+  const outstanding = bookings
+    .filter(b => b.status === 'pending')
+    .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 
   const stats = [
-    {
-      label: 'Total Paid',
-      value: '$3,000',
-      icon: DollarSign,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-    },
-    {
-      label: 'Outstanding',
-      value: '$0',
-      icon: CreditCard,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-    },
-    {
-      label: 'Transactions',
-      value: '2',
-      icon: CheckCircle,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-    },
+    { label: 'Total Paid',   value: `₱${totalPaid.toLocaleString()}`,   icon: CreditCard,  color: 'text-green-600',  bg: 'bg-green-50'  },
+    { label: 'Outstanding',  value: `₱${outstanding.toLocaleString()}`, icon: CreditCard,  color: 'text-orange-600', bg: 'bg-orange-50' },
+    { label: 'Transactions', value: bookings.length,                     icon: CheckCircle, color: 'text-blue-600',   bg: 'bg-blue-50'   },
   ];
 
   return (
     <DashboardLayout publicMenuItems={publicMenuItems} dashboardMenuItems={dashboardMenuItems}>
-      <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-display font-bold text-gray-900 mb-2">
+
+      {/* ── Heading ── */}
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-gray-900 mb-1 sm:mb-2">
           Payments
         </h1>
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-sm sm:text-base">
           Track your payment history and manage outstanding balances
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{error}</div>
+      )}
+
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
         {stats.map((stat, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="bg-white rounded-2xl border border-gray-200 p-6"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+            className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 flex sm:block items-center gap-4"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`p-3 rounded-xl ${stat.bgColor}`}>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-              </div>
+            {/* Icon */}
+            <div className={`p-3 rounded-xl ${stat.bg} flex-shrink-0`}>
+              <stat.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${stat.color}`} />
             </div>
-            <p className="text-sm text-gray-500 mb-1">{stat.label}</p>
-            <p className="text-3xl font-display font-bold text-gray-900">{stat.value}</p>
+            {/* Value */}
+            <div className="min-w-0 sm:mt-3">
+              <p className="text-xs sm:text-sm text-gray-500 mb-0.5 sm:mb-1 leading-tight">{stat.label}</p>
+              {loading
+                ? <div className="h-7 sm:h-9 w-24 bg-gray-100 animate-pulse rounded" />
+                : <p className="text-xl sm:text-3xl font-display font-bold text-gray-900 truncate">{stat.value}</p>
+              }
+            </div>
           </motion.div>
         ))}
       </div>
 
-      {/* Payment History */}
+      {/* ── Payment History ── */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
         className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
       >
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-display font-bold text-gray-900">Payment History</h2>
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200">
+          <h2 className="text-lg sm:text-xl font-display font-bold text-gray-900">Payment History</h2>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        {/* ── Desktop Table (md+) ── */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-sm">
             <thead className="bg-gray-50">
               <tr>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-4">
-                  Transaction ID
-                </th>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-4">
-                  Booking
-                </th>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-4">
-                  Date
-                </th>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-4">
-                  Amount
-                </th>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-4">
-                  Method
-                </th>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-4">
-                  Status
-                </th>
-                <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-4">
-                  Actions
-                </th>
+                {['Ref Code', 'Room', 'Date', 'Amount', 'Payment Type', 'Status'].map(h => (
+                  <th key={h} className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-6 py-4 whitespace-nowrap">{h}</th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {transactions.map((transaction, i) => (
-                <motion.tr
-                  key={transaction.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 + i * 0.1 }}
-                  className="hover:bg-gray-50"
-                >
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                [...Array(3)].map((_, i) => (
+                  <tr key={i}>{[...Array(6)].map((_, j) => (
+                    <td key={j} className="px-6 py-4">
+                      <div className="h-4 bg-gray-100 animate-pulse rounded w-16" />
+                    </td>
+                  ))}</tr>
+                ))
+              ) : bookings.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-gray-400">No payment history yet.</td>
+                </tr>
+              ) : bookings.map((b, i) => (
+                <motion.tr key={b.id}
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 + i * 0.05 }}
+                  className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 font-mono text-xs font-semibold text-ocean-600 whitespace-nowrap">{b.refCode || '—'}</td>
+                  <td className="px-6 py-4">
+                    <p className="font-medium text-gray-900 whitespace-nowrap">{b.roomName || '—'}</p>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-gray-900">{transaction.id}</span>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar className="w-4 h-4 flex-shrink-0" />
+                      {new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 font-semibold text-gray-900 whitespace-nowrap">
+                    ₱{(b.totalPrice || 0).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                    {paymentLabel[b.paymentType] || b.paymentType || '—'}
                   </td>
                   <td className="px-6 py-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{transaction.roomName}</p>
-                      <p className="text-xs text-gray-500">{transaction.bookingId}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Calendar className="w-4 h-4" />
-                      <span>
-                        {new Date(transaction.date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-semibold text-gray-900">
-                      ${transaction.amount.toLocaleString()}
+                    <span className={`px-2.5 py-1 inline-flex text-xs font-semibold rounded-full capitalize whitespace-nowrap ${statusStyles[b.status] || 'bg-gray-100 text-gray-600'}`}>
+                      {b.status}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600">{transaction.method}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      {transaction.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button className="inline-flex items-center space-x-1 text-sm text-ocean-600 hover:text-ocean-700 font-medium">
-                      <Download className="w-4 h-4" />
-                      <span>Receipt</span>
-                    </button>
                   </td>
                 </motion.tr>
               ))}
             </tbody>
           </table>
         </div>
-      </motion.div>
 
-      {/* Payment Methods */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-        className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
-      >
-        <h2 className="text-xl font-display font-bold text-gray-900 mb-4">Payment Methods</h2>
-        <p className="text-gray-600 text-sm mb-4">
-          Add a payment method for faster checkout
-        </p>
-        <button className="px-6 py-3 bg-ocean-600 text-white rounded-xl hover:bg-ocean-700 transition-colors font-medium">
-          + Add Payment Method
-        </button>
+        {/* ── Mobile Cards (<md) ── */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {loading ? (
+            [...Array(3)].map((_, i) => (
+              <div key={i} className="p-4 space-y-3 animate-pulse">
+                <div className="flex justify-between">
+                  <div className="h-4 bg-gray-100 rounded w-28" />
+                  <div className="h-5 bg-gray-100 rounded-full w-20" />
+                </div>
+                <div className="h-10 bg-gray-100 rounded-xl" />
+              </div>
+            ))
+          ) : bookings.length === 0 ? (
+            <div className="py-12 text-center text-gray-400 text-sm">No payment history yet.</div>
+          ) : bookings.map((b, i) => (
+            <motion.div key={b.id}
+              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 + i * 0.05 }}
+              className="p-4 hover:bg-gray-50/60 transition-colors"
+            >
+              {/* Top row: room + status */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-900 text-sm leading-tight truncate">{b.roomName || '—'}</p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">Ref</span>
+                    <span className="font-mono text-[11px] font-bold text-ocean-600 bg-ocean-50 px-1.5 py-0.5 rounded">
+                      {b.refCode || '—'}
+                    </span>
+                  </div>
+                </div>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize flex-shrink-0 ${statusStyles[b.status] || 'bg-gray-100 text-gray-600'}`}>
+                  {b.status}
+                </span>
+              </div>
+
+              {/* Detail grid */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 bg-gray-50 rounded-xl p-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-0.5">Amount</p>
+                  <p className="text-sm font-bold text-green-700">₱{(b.totalPrice || 0).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-0.5">Payment Type</p>
+                  <p className="text-sm font-medium text-gray-800 truncate">
+                    {paymentLabel[b.paymentType] || b.paymentType || '—'}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-0.5">Date</p>
+                  <div className="flex items-center gap-1.5 text-sm font-medium text-gray-800">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    {new Date(b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
     </DashboardLayout>
   );

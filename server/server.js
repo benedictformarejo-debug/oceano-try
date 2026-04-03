@@ -5,6 +5,10 @@ import { testConnection } from './config/supabase.js';
 import authRoutes from './routes/auth.js';
 import bookingRoutes from './routes/bookings.js';
 import roomRoutes from './routes/rooms.js';
+import usersRoutes from './routes/users.js';
+import settingsRoutes from './routes/settings.js';
+import requestsRoutes from './routes/requests.js';
+
 
 dotenv.config();
 
@@ -20,6 +24,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/users', usersRoutes);  // 👈 just add this line
+app.use('/api/settings', settingsRoutes);
+app.use('/api/requests', requestsRoutes);
+
+
+
+
 
 // Health check
 app.get('/api/health', (req, res) => {

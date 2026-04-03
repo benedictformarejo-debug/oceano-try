@@ -1,151 +1,124 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Clock, CheckCheck, AlertCircle } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
+import { bookingsAPI } from '../../services/api';
 import { Home, Calendar, UserCheck, BedDouble, CreditCard } from 'lucide-react';
 
 const menuItems = [
-  { path: '/staff', label: 'Overview', icon: Home },
-  { path: '/staff/reservations', label: 'Reservations', icon: Calendar },
-  { path: '/staff/checkinout', label: 'Check-In/Out', icon: UserCheck },
-  { path: '/staff/room-status', label: 'Room Status', icon: BedDouble },
-  { path: '/staff/requests', label: 'Guest Requests', icon: MessageSquare },
-  { path: '/staff/payments', label: 'Payments', icon: CreditCard },
+  { path: '/staff',              label: 'Overview',       icon: Home          },
+  { path: '/staff/reservations', label: 'Reservations',   icon: Calendar      },
+  { path: '/staff/checkinout',   label: 'Check-In/Out',   icon: UserCheck     },
+  { path: '/staff/room-status',  label: 'Room Status',    icon: BedDouble     },
+  { path: '/staff/requests',     label: 'Guest Requests', icon: MessageSquare },
+  { path: '/staff/payments',     label: 'Payments',       icon: CreditCard    },
 ];
 
-const initialRequests = [
-  { id: 1, guest: 'John Smith',    room: 'Oceanus Room',        type: 'Housekeeping',   message: 'Please clean the room and replace towels.',   time: '9:15 AM',  priority: 'normal', status: 'pending'    },
-  { id: 2, guest: 'David Lee',     room: 'Ouranus Room',        type: 'Room Service',   message: 'Can we get extra coffee and snacks please?',  time: '10:00 AM', priority: 'normal', status: 'in-progress'},
-  { id: 3, guest: 'Sarah Johnson', room: 'Apollo Room',         type: 'Maintenance',    message: 'The shower faucet is leaking.',               time: '10:45 AM', priority: 'urgent', status: 'pending'    },
-  { id: 4, guest: 'Maria Garcia',  room: 'Athena Room',         type: 'Extra Amenities',message: 'We need 2 extra pillows and a baby cot.',     time: '11:30 AM', priority: 'normal', status: 'resolved'   },
-  { id: 5, guest: 'Robert Chen',   room: 'Cronos Room',         type: 'Housekeeping',   message: 'Room needs to be prepared for early check-in.',time: '12:00 PM', priority: 'urgent', status: 'pending'    },
-];
-
-const typeColors = {
-  'Housekeeping':    'bg-purple-100 text-purple-700',
-  'Room Service':    'bg-blue-100 text-blue-700',
-  'Maintenance':     'bg-red-100 text-red-700',
-  'Extra Amenities': 'bg-yellow-100 text-yellow-700',
-};
-
-const statusConfig = {
-  pending:      { label: 'Pending',     color: 'bg-yellow-100 text-yellow-700', next: 'in-progress' },
-  'in-progress':{ label: 'In Progress', color: 'bg-blue-100 text-blue-700',     next: 'resolved'    },
-  resolved:     { label: 'Resolved',    color: 'bg-green-100 text-green-700',   next: null           },
+const statusStyles = {
+  confirmed:     'bg-green-100 text-green-700',
+  pending:       'bg-yellow-100 text-yellow-700',
+  cancelled:     'bg-red-100 text-red-700',
+  'checked-in':  'bg-blue-100 text-blue-700',
+  'checked-out': 'bg-gray-100 text-gray-600',
 };
 
 const StaffGuestRequests = () => {
-  const [requests, setRequests] = useState(initialRequests);
-  const [filter, setFilter]     = useState('all');
+  const [bookings, setBookings] = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
 
-  const advance = (id) => {
-    setRequests(requests.map(r => {
-      if (r.id !== id) return r;
-      const next = statusConfig[r.status].next;
-      return next ? { ...r, status: next } : r;
-    }));
-  };
+  useEffect(() => {
+    bookingsAPI.getAllBookings()
+      .then(data => setBookings(data.bookings || []))
+      .catch(err  => setError(err.message))
+      .finally(()  => setLoading(false));
+  }, []);
 
-  const filtered = filter === 'all' ? requests : requests.filter(r => r.status === filter);
-
-  const counts = {
-    pending:      requests.filter(r => r.status === 'pending').length,
-    'in-progress':requests.filter(r => r.status === 'in-progress').length,
-    resolved:     requests.filter(r => r.status === 'resolved').length,
-  };
+  const withRequests = bookings.filter(b => b.specialRequest && b.specialRequest.trim() !== '');
 
   return (
     <DashboardLayout dashboardMenuItems={menuItems}>
-      <div className="mb-6">
-        <h1 className="text-2xl font-display font-bold text-gray-900">Guest Requests</h1>
-        <p className="text-gray-500 text-sm mt-1">Manage and respond to guest needs</p>
+
+      {/* ── Heading ── */}
+      <div className="mb-5">
+        <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-900">Guest Requests</h1>
+        <p className="text-gray-500 text-sm mt-1">Special requests submitted during booking</p>
       </div>
 
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {[
-          { key: 'pending',      label: 'Pending',     icon: Clock,      color: 'text-yellow-600', bg: 'bg-yellow-50' },
-          { key: 'in-progress',  label: 'In Progress', icon: AlertCircle,color: 'text-blue-600',   bg: 'bg-blue-50'   },
-          { key: 'resolved',     label: 'Resolved',    icon: CheckCheck, color: 'text-green-600',  bg: 'bg-green-50'  },
-        ].map(({ key, label, icon: Icon, color, bg }) => (
-          <div key={key} className={`${bg} rounded-xl p-4 flex items-center gap-3`}>
-            <Icon className={`w-6 h-6 ${color}`} />
-            <div>
-              <p className="text-2xl font-display font-bold text-gray-900">{counts[key]}</p>
-              <p className="text-xs text-gray-500">{label}</p>
-            </div>
-          </div>
-        ))}
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+          Failed to load requests: {error}
+        </div>
+      )}
+
+      {/* ── Summary banner ── */}
+      <div className="mb-5 bg-ocean-50 border border-ocean-100 rounded-xl p-4 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-ocean-100 flex items-center justify-center flex-shrink-0">
+          <MessageSquare className="w-5 h-5 text-ocean-600" />
+        </div>
+        <div className="min-w-0">
+          {loading
+            ? <div className="h-7 w-8 bg-ocean-100 animate-pulse rounded mb-0.5" />
+            : <p className="text-2xl font-display font-bold text-gray-900 leading-tight">{withRequests.length}</p>
+          }
+          <p className="text-xs text-gray-500 leading-tight">Total Special Requests</p>
+        </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2 mb-5 flex-wrap">
-        {['all', 'pending', 'in-progress', 'resolved'].map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
-              filter === f
-                ? 'bg-ocean-600 text-white'
-                : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-
-      {/* Request Cards */}
-      <div className="space-y-4">
-        {filtered.length === 0 && (
-          <div className="text-center py-12 text-gray-400">No requests found.</div>
-        )}
-        {filtered.map((req, i) => {
-          const cfg = statusConfig[req.status];
-          return (
-            <motion.div
-              key={req.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className={`bg-white rounded-xl shadow-sm border p-5 ${
-                req.priority === 'urgent' ? 'border-red-300' : 'border-gray-200'
-              }`}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeColors[req.type] || 'bg-gray-100 text-gray-600'}`}>
-                      {req.type}
-                    </span>
-                    {req.priority === 'urgent' && (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                        🚨 Urgent
-                      </span>
-                    )}
-                    <span className="text-xs text-gray-400">{req.time}</span>
-                  </div>
-                  <p className="font-semibold text-gray-900">{req.guest}</p>
-                  <p className="text-xs text-gray-500 mb-2">{req.room}</p>
-                  <p className="text-sm text-gray-700 bg-gray-50 rounded-lg px-3 py-2">{req.message}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2 shrink-0">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${cfg.color}`}>
-                    {cfg.label}
-                  </span>
-                  {cfg.next && (
-                    <button
-                      onClick={() => advance(req.id)}
-                      className="px-3 py-1.5 bg-ocean-600 hover:bg-ocean-700 text-white rounded-lg text-xs font-medium transition-colors"
-                    >
-                      {req.status === 'pending' ? 'Start' : 'Resolve'}
-                    </button>
-                  )}
-                </div>
+      {/* ── Request cards ── */}
+      <div className="space-y-3 sm:space-y-4">
+        {loading ? (
+          [...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 space-y-3 animate-pulse">
+              <div className="flex items-center gap-2">
+                <div className="h-4 bg-gray-100 rounded w-32" />
+                <div className="h-5 bg-gray-100 rounded-full w-20" />
               </div>
-            </motion.div>
-          );
-        })}
+              <div className="h-3 bg-gray-100 rounded w-48" />
+              <div className="h-12 bg-gray-100 rounded-lg" />
+            </div>
+          ))
+        ) : withRequests.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 py-14 text-center text-gray-400 text-sm">
+            No special requests from guests yet.
+          </div>
+        ) : withRequests.map((b, i) => (
+          <motion.div
+            key={b.id}
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+            className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+          >
+            {/* Card header */}
+            <div className="px-4 sm:px-5 pt-4 pb-3 border-b border-gray-100">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-gray-900 text-sm leading-tight truncate">
+                    {b.fullName || '—'}
+                  </p>
+                  {/* Room + dates — wraps gracefully on small screens */}
+                  <p className="text-xs text-gray-500 mt-1 leading-snug">
+                    <span className="font-medium text-gray-700">{b.roomName}</span>
+                    <span className="mx-1 text-gray-300">·</span>
+                    <span className="whitespace-nowrap">Check-in: {b.checkIn}</span>
+                    <span className="mx-1 text-gray-300">→</span>
+                    <span className="whitespace-nowrap">Check-out: {b.checkOut}</span>
+                  </p>
+                </div>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize flex-shrink-0 ${statusStyles[b.status] || 'bg-gray-100 text-gray-600'}`}>
+                  {b.status}
+                </span>
+              </div>
+            </div>
+
+            {/* Special request body */}
+            <div className="px-4 sm:px-5 py-3 sm:py-4">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1.5">
+                Special Request
+              </p>
+              <p className="text-sm text-gray-800 leading-relaxed">{b.specialRequest}</p>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </DashboardLayout>
   );

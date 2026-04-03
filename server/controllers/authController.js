@@ -129,14 +129,17 @@ export const getProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        createdAt: user.created_at
-      }
-    });
+    // And in the response:
+res.json({
+  user: {
+    id:        user.id,
+    name:      user.name,
+    email:     user.email,
+    role:      user.role,       // add this
+    status:    user.status,     // add this
+    createdAt: user.created_at
+  }
+});
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });

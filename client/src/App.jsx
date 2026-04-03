@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
 // Public Pages
+import HotelChatbot from './components/HotelChatbot';
 import Home from './pages/Home';
 import About from './pages/About';
 import RoomDetail from './pages/RoomDetail';
@@ -19,6 +20,7 @@ import Register from './pages/Register';
 
 // Booking Pages
 import BookingConfirmation from './pages/BookingConfirmation';
+import ManageBooking from './pages/ManageBooking';
 
 // Guest Dashboard
 import GuestDashboard from './pages/dashboard/GuestDashboard';
@@ -47,6 +49,7 @@ function App() {
     <AuthProvider>
       <Router>
         <ScrollToTop />
+        <HotelChatbot />  {/* ← ADD IT HERE */}
         <Routes>
           {/* Public Routes - WITH Navbar + Footer */}
           <Route path="/" element={
@@ -78,8 +81,6 @@ function App() {
             </div>
           } />
 
-          
-
           <Route path="/gallery" element={
             <div className="flex flex-col min-h-screen">
               <Navbar />
@@ -93,6 +94,17 @@ function App() {
               <main className="flex-grow"><Contact /></main>
             </div>
           } />
+
+          {/* Booking — no login required */}
+          <Route path="/booking/confirm" element={
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-grow"><BookingConfirmation /></main>
+            </div>
+          } />
+
+          {/* Manage Booking — no login required */}
+          <Route path="/manage-booking" element={<ManageBooking />} />
 
           {/* Auth Pages - NO Navbar/Footer */}
           <Route path="/login" element={<Login />} />
@@ -117,71 +129,45 @@ function App() {
 
           {/* Staff Dashboard */}
           <Route path="/staff" element={
-            <ProtectedRoute requiredRole="staff">
-              <StaffDashboard />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="staff"><StaffDashboard /></ProtectedRoute>
           } />
           <Route path="/staff/reservations" element={
-            <ProtectedRoute requiredRole="staff">
-              <StaffReservations />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="staff"><StaffReservations /></ProtectedRoute>
           } />
           <Route path="/staff/checkinout" element={
-            <ProtectedRoute requiredRole="staff">
-              <StaffCheckInOut />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="staff"><StaffCheckInOut /></ProtectedRoute>
           } />
           <Route path="/staff/room-status" element={
-            <ProtectedRoute requiredRole="staff">
-              <StaffRoomStatus />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="staff"><StaffRoomStatus /></ProtectedRoute>
           } />
           <Route path="/staff/requests" element={
-            <ProtectedRoute requiredRole="staff">
-              <StaffGuestRequests />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="staff"><StaffGuestRequests /></ProtectedRoute>
           } />
           <Route path="/staff/payments" element={
-            <ProtectedRoute requiredRole="staff">
-              <StaffPayments />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="staff"><StaffPayments /></ProtectedRoute>
           } />
 
           {/* Admin Dashboard */}
           <Route path="/admin" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminDashboard />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="admin"><AdminDashboard /></ProtectedRoute>
           } />
           <Route path="/admin/reservations" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminReservations />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="admin"><AdminReservations /></ProtectedRoute>
           } />
           <Route path="/admin/rooms" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminRooms />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="admin"><AdminRooms /></ProtectedRoute>
           } />
           <Route path="/admin/users" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminUsers />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="admin"><AdminUsers /></ProtectedRoute>
           } />
           <Route path="/admin/finance" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminFinance />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="admin"><AdminFinance /></ProtectedRoute>
           } />
           <Route path="/admin/reports" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminReports />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="admin"><AdminReports /></ProtectedRoute>
           } />
           <Route path="/admin/settings" element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminSettings />
-            </ProtectedRoute>
+            <ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>
           } />
         </Routes>
       </Router>

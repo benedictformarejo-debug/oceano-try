@@ -3,9 +3,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Users, Wifi, Utensils, Beef, Tv, Wind,
-  ChevronLeft, ChevronRight, X, Music
+  ChevronLeft, ChevronRight, X, Music, Clock
 } from 'lucide-react';
 import { bookingsAPI } from '../services/api';
+
+
+const ARRIVAL_TIMES = [
+  '14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00',
+];
+const formatTime = (t) => {
+  const [h] = t.split(':');
+  const hour = parseInt(h);
+  return `${hour % 12 || 12}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
+};
+
 
 const RoomDetail = () => {
   const { roomId } = useParams();
@@ -16,13 +27,14 @@ const RoomDetail = () => {
   const [selectedMonth, setSelectedMonth]           = useState(new Date());
   const [selectedDates, setSelectedDates]           = useState({ checkIn: null, checkOut: null });
   const [guests, setGuests]                         = useState(1);
+  const [arrivalTime, setArrivalTime] = useState('14:00'); // ← ADD THIS
   const [bookingError, setBookingError]             = useState('');
   const [bookedDates, setBookedDates]               = useState([]);
   const [loadingDates, setLoadingDates]             = useState(true);
 
   const allRooms = [
     {
-      id: '1', name: 'Oceanus Room',
+      id: 'd49a696f-9eb7-4053-84c5-160a7b0200cf', name: 'Oceanus Room',
       description: 'Wake up to breathtaking panoramic views of the ocean.',
       longDescription: 'Immerse yourself in luxury with our Ocean View Suite. This meticulously designed space offers floor-to-ceiling windows that frame stunning ocean vistas, creating a seamless connection between indoor comfort and outdoor beauty. The private balcony is your personal sanctuary for morning coffee or sunset cocktails.',
       price: 3000, capacity: 2,
@@ -36,7 +48,7 @@ const RoomDetail = () => {
       ],
     },
     {
-      id: '2', name: 'Athena Room',
+      id: '9eb09791-cc36-4c30-9d00-374a0693d70a', name: 'Athena Room',
       description: 'Experience ultimate luxury in your own private pool villa.',
       longDescription: 'Your private oasis awaits. This exclusive villa features an infinity pool surrounded by lush tropical gardens. Perfect for families or groups seeking privacy and luxury.',
       price: 4500, capacity: 4,
@@ -50,7 +62,7 @@ const RoomDetail = () => {
       ],
     },
     {
-      id: '3', name: 'Ouranus Room',
+      id: 'f1073d3b-f2d3-4742-ba4a-6ee892efbde2', name: 'Ouranus Room',
       description: 'Surrounded by lush tropical gardens, this serene retreat offers tranquility and comfort.',
       longDescription: 'Find peace in our garden-facing sanctuary. Wake up to the sounds of tropical birds and enjoy your morning coffee surrounded by nature. Perfect for groups seeking a peaceful getaway with exclusive pool access.',
       price: 9000, capacity: 10,
@@ -64,7 +76,7 @@ const RoomDetail = () => {
       ],
     },
     {
-      id: '4', name: 'Apollo Room',
+      id: 'fafb7d3c-5092-4be8-8fd9-d6e616383b67', name: 'Apollo Room',
       description: 'Step directly onto the pristine white sand from your private bungalow.',
       longDescription: 'Experience the ultimate beach lifestyle. Your bungalow opens directly onto our private beach, offering unparalleled access to the ocean and stunning sunrise views.',
       price: 4500, capacity: 4,
@@ -78,7 +90,7 @@ const RoomDetail = () => {
       ],
     },
     {
-      id: '5', name: 'Cronus Room',
+      id: '0da54734-e47c-409f-a694-4940245dd216', name: 'Cronus Room',
       description: 'The epitome of luxury for large groups with kitchen, roofdeck, and entertainment.',
       longDescription: 'Experience the pinnacle of luxury in our Cronus Room. Multiple bedrooms, full kitchen facilities, roofdeck access, free karaoke and a grilling station — everything your group needs.',
       price: 7500, capacity: 10,
@@ -114,7 +126,7 @@ const RoomDetail = () => {
       }
     };
     fetchDates();
-  }, [room, roomId, navigate]);
+}, [roomId]);
 
   // ── Calendar helpers ──────────────────────────────────────────────────────
   const getDaysInMonth = (date) => {
@@ -177,6 +189,15 @@ const RoomDetail = () => {
 
   const calculateTotal = () => calculateNights() * room.price;
 
+
+// ── Date helper to avoid UTC timezone shift ───────────────────────────────
+  const toLocalDate = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  };
+
   // ── Booking — no login required, go straight to confirmation ─────────────
   const handleBooking = () => {
     if (!selectedDates.checkIn || !selectedDates.checkOut) {
@@ -189,8 +210,9 @@ const RoomDetail = () => {
           roomId:        room.id,
           roomName:      room.name,
           roomImage:     room.images[0],
-          checkIn:       selectedDates.checkIn.toISOString().split('T')[0],
-          checkOut:      selectedDates.checkOut.toISOString().split('T')[0],
+          checkIn:  toLocalDate(selectedDates.checkIn),
+          checkOut: toLocalDate(selectedDates.checkOut),
+          arrivalTime,  // ← ADD THIS
           guests,
           nights:        calculateNights(),
           pricePerNight: room.price,
@@ -333,8 +355,8 @@ const RoomDetail = () => {
                           className={[
                             'aspect-square rounded-lg text-sm font-medium transition-all duration-150',
                             !date ? 'invisible' : '',
-                            isBooked ? 'bg-red-100 text-red-400 line-through cursor-not-allowed' : '',
-                            !isBooked && isPast ? 'text-gray-300 cursor-not-allowed' : '',
+                            isPast ? 'text-gray-300 cursor-not-allowed' : '',
+                            !isPast && isBooked ? 'bg-red-100 text-red-400 line-through cursor-not-allowed' : '',
                             isStart || isEnd ? 'bg-ocean-600 text-white scale-105 shadow-md' : '',
                             isInRange && !isStart && !isEnd ? 'bg-ocean-100 text-ocean-800 rounded-none' : '',
                             !isDisabled && !isInRange ? 'hover:bg-ocean-50 text-gray-700 hover:scale-105' : '',
@@ -349,7 +371,6 @@ const RoomDetail = () => {
                 <div className="mt-4 space-y-1.5 text-xs">
                   {[
                     { bg: 'bg-ocean-600', label: 'Selected / Range ends'  },
-                    { bg: 'bg-ocean-100', label: 'In range'               },
                     { bg: 'bg-red-100',   label: 'Unavailable / Booked'   },
                     { bg: 'bg-gray-100',  label: 'Past date'              },
                   ].map(({ bg, label }) => (
@@ -360,6 +381,27 @@ const RoomDetail = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Arrival Time */}
+<div className="mb-5">
+  <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-2">
+    <Clock className="w-4 h-4 text-gray-400" />
+    Estimated Arrival Time
+  </label>
+  <div className="relative">
+    <select
+      value={arrivalTime}
+      onChange={e => setArrivalTime(e.target.value)}
+      className="w-full appearance-none px-4 py-3 pr-10 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-ocean-500 focus:border-transparent cursor-pointer hover:border-gray-400 transition-colors"
+    >
+      {ARRIVAL_TIMES.map(t => (
+        <option key={t} value={t}>{formatTime(t)}</option>
+      ))}
+    </select>
+    <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 rotate-90 pointer-events-none" />
+  </div>
+  <p className="text-xs text-gray-400 mt-1.5">Standard check-in starts at 2:00 PM</p>
+</div>
 
               {/* Guests */}
               <div className="mb-6">
@@ -379,6 +421,7 @@ const RoomDetail = () => {
                     {[
                       ['Check-in',  selectedDates.checkIn.toLocaleDateString()],
                       ['Check-out', selectedDates.checkOut.toLocaleDateString()],
+                      ['Arrival',   formatTime(arrivalTime)],
                       ['Nights',    calculateNights()],
                     ].map(([label, value]) => (
                       <div key={label} className="flex justify-between">
