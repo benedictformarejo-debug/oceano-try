@@ -1,383 +1,358 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { Award, Heart, Users, Star, Leaf, Shield, ChevronRight, Quote } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Button from '../components/Button';
+import Testimonials from '../components/Testimonials';
 
 
-const About = () => {
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  const values = [
-    {
-      icon: Heart,
-      title: 'Passion for Excellence',
-      description: 'We are committed to providing exceptional service and unforgettable experiences to every guest.',
-      color: 'from-rose-400 to-pink-600',
-      bg: 'bg-rose-50',
-    },
-    {
-      icon: Users,
-      title: 'Guest-Centric Approach',
-      description: 'Your comfort and satisfaction are at the heart of everything we do.',
-      color: 'from-ocean-400 to-ocean-600',
-      bg: 'bg-ocean-50',
-    },
-    {
-      icon: Award,
-      title: 'Award-Winning Service',
-      description: 'Recognized globally for our commitment to luxury hospitality and sustainable practices.',
-      color: 'from-amber-400 to-orange-500',
-      bg: 'bg-amber-50',
-    },
-    {
-      icon: Star,
-      title: 'Attention to Detail',
-      description: 'Every aspect of your stay is carefully curated to exceed your expectations.',
-      color: 'from-violet-400 to-purple-600',
-      bg: 'bg-violet-50',
-    },
-    {
-      icon: Leaf,
-      title: 'Sustainability First',
-      description: 'We protect the natural beauty around us through responsible, eco-conscious practices.',
-      color: 'from-emerald-400 to-teal-600',
-      bg: 'bg-emerald-50',
-    },
-    {
-      icon: Shield,
-      title: 'Trust & Privacy',
-      description: 'Your safety, security, and privacy are our unwavering commitment to you.',
-      color: 'from-sky-400 to-blue-600',
-      bg: 'bg-sky-50',
-    },
-  ];
+const FAN = [
+  { src: '/images/IMG_4567.jpg',  w: 148, h: 210, rotate: 0, left:  -10, z: 1, bottom: 100 },
+  { src: '/images/IMG_4569.jpg',  w: 210, h: 310, rotate: 0, left:  160, z: 3, bottom: 60 },
+  { src: '/images/IMG_4564.jpg',  w: 310, h: 450, rotate: 0, left:  395, z: 5, bottom: 0  },
+  { src: '/images/IMG_4566.jpg',  w: 210, h: 310, rotate: 0, left:  725, z: 3, bottom: 60 },
+  { src: '/images/IMG_4568.jpg',  w: 148, h: 210, rotate: 0, left:  962, z: 1, bottom: 100 },
+];
 
-  const testimonials = [
-    {
-      name: 'Emily Watson',
-      location: 'New York, USA',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
-      text: 'Oceano Con Vista completely redefined luxury for me. The ocean view suite was breathtaking and the staff anticipated every need before I even had to ask.',
-      stay: 'Ocean View Suite · 7 nights',
-    },
-    {
-      name: 'James & Clara Hoffman',
-      location: 'London, UK',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-      text: 'We celebrated our 10th anniversary here and it was absolutely perfect. The private pool villa and candlelit dinner on the beach — every detail was thoughtfully arranged.',
-      stay: 'Premium Pool Villa · 5 nights',
-    },
-    {
-      name: 'Mei Lin',
-      location: 'Tokyo, Japan',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
-      text: 'I travel frequently and have stayed in resorts all over the world. Oceano Con Vista stands in a league of its own. The spa alone is worth the trip.',
-      stay: 'Deluxe Garden Room · 4 nights',
-    },
-    {
-      name: 'Carlos Mendez',
-      location: 'Mexico City, Mexico',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
-      text: 'Brought the whole family for a week and every single person had the time of their lives. The beach villa was enormous and the staff treated the kids like royalty.',
-      stay: 'Family Beach Villa · 6 nights',
-    },
-    {
-      name: 'Sophie Archambault',
-      location: 'Paris, France',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80',
-      text: 'The food here rivals anything I have had in Paris — and that is saying something. The tasting menu under the stars was one of the most memorable meals of my life.',
-      stay: 'Presidential Suite · 3 nights',
-    },
-    {
-      name: 'Daniel & Priya Nair',
-      location: 'Sydney, Australia',
-      rating: 5,
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
-      text: 'We have been coming here every year for our anniversary for four years now. The team remembers our names, our preferences, our favorite table. Irreplaceable.',
-      stay: 'Ocean View Suite · 5 nights',
-    },
-  ];
+/* ─── Fan Hero ─── */
+const FanHero = () => (
+  <section
+    style={{
+      background: '#f5f2ec',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingTop: 120,
+      paddingBottom: 80,
+      overflow: 'hidden',
+    }}
+  >
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+    `}</style>
 
-  return (
-    <div className="min-h-screen overflow-hidden">
-
-      {/* ── HERO ── */}
-      <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
-        <motion.div style={{ y: heroY }} className="absolute inset-0">
-          <div
-            className="absolute inset-0 bg-cover bg-center scale-110"
-            style={{ backgroundImage: 'url(images/IMG_4553.jpg)' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/55" />
-        </motion.div>
-
-        <motion.div
-          style={{ opacity: heroOpacity }}
-          className="relative z-10 text-center text-white px-6 max-w-2xl mx-auto"
-        >
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2 }}
-            className="text-6xl md:text-8xl font-display font-bold mb-5 leading-tight"
-          >
-    
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.45 }}
-            className="text-lg text-white/70"
-          >
-          </motion.p>
-        </motion.div>
-      </section>
-
-      {/* ── SPLIT STORY ── */}
-      <section className="bg-white py-32 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative h-[560px]"
-          >
-            <div
-              className="absolute top-0 left-0 w-4/5 h-4/5 rounded-3xl bg-cover bg-center shadow-2xl"
-              style={{ backgroundImage: 'url(images/IMG_4555.jpg)' }}
-            />
-            <div
-              className="absolute bottom-0 right-0 w-3/5 h-3/5 rounded-3xl bg-cover bg-center shadow-2xl border-4 border-white"
-              style={{ backgroundImage: 'url(images/IMG_4554.jpeg)' }}
-            />
-            <motion.div
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ type: 'spring', delay: 0.4 }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-ocean-700 rounded-full flex flex-col items-center justify-center text-white shadow-xl z-10"
+    {/* ── Heading ── */}
+    <motion.div
+      style={{ textAlign: 'center', marginBottom: 40, padding: '0 24px', maxWidth: 860 }}
+      initial="hidden"
+      animate="visible"
+    >
+      {['Find peace in peaks'].map((line, li) => (
+        <div key={li} style={{ overflow: 'hidden', display: 'block', lineHeight: 1.1 }}>
+          {line.split(' ').map((word, wi) => (
+            <motion.span
+              key={wi}
+              variants={{
+                hidden: { y: '115%', opacity: 0 },
+                visible: {
+                  y: 0, opacity: 1,
+                  transition: { duration: 1, ease: [0.22, 1, 0.36, 1], delay: li * 0.28 + wi * 0.07 },
+                },
+              }}
+              style={{
+                display: 'inline-block',
+                marginRight: '0.22em',
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontSize: 'clamp(6rem, 5.5vw, 5rem)',
+                fontWeight: 100,
+                color: '#1e3624',
+                letterSpacing: '-0.015em',
+              }}
             >
-              <span className="text-3xl font-display font-bold">29</span>
-              <span className="text-xs text-center leading-tight px-2">Years of Excellence</span>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="space-y-8"
-          >
-            <div>
-              <p className="text-ocean-600 font-medium tracking-widest uppercase text-sm mb-4">Who We Are</p>
-              <h2 className="text-5xl font-display font-bold text-gray-900 leading-tight mb-6">
-                Oceano Con Vista <span className="text-ocean-600">Highlands</span>
-              </h2>
-            </div>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Since opening our doors in 2019, Oceano Con Vista has been a beacon of luxury
-              and tranquility on the pristine coastline. What began as a vision to create
-              the perfect seaside retreat has blossomed into one of the world's most
-              celebrated luxury resorts.
-            </p>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Our commitment to excellence is reflected in every aspect — from our
-              meticulously designed accommodations to our world-class dining and
-              personalized service. We believe true luxury lives in the details.
-            </p>
-            <Link
-              to="/rooms"
-              className="inline-flex items-center space-x-2 text-ocean-600 font-semibold hover:text-ocean-800 transition-colors group"
-            >
-              <span>Explore Our Rooms</span>
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── STATS BAND ── */}
-      <section className="relative py-24 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1920&q=80)' }}
-        />
-        <div className="absolute inset-0 bg-ocean-900/85 backdrop-blur-sm" />
-        <div className="relative z-10 max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-10 text-center text-white">
-          {[
-            { value: '29+', label: 'Years of Excellence' },
-            { value: '50K+', label: 'Happy Guests' },
-            { value: '25+', label: 'Global Awards' },
-            { value: '150+', label: 'Team Members' },
-          ].map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-            >
-              <div className="text-6xl font-display font-bold text-ocean-300">{stat.value}</div>
-              <div className="text-white/70 text-sm tracking-wide uppercase mt-2">{stat.label}</div>
-            </motion.div>
+              {word}
+            </motion.span>
           ))}
         </div>
-      </section>
+      ))}
+    </motion.div>
 
-      {/* ── VALUES ── */}
-      <section className="bg-white py-32 px-6">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <p className="text-ocean-600 font-medium tracking-widest uppercase text-sm mb-4">What Drives Us</p>
-            <h2 className="text-5xl font-display font-bold text-gray-900 mb-4">Our Core Values</h2>
-            <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-              The principles that guide every decision, every interaction, and every experience we create.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {values.map((value, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                whileHover={{ y: -6 }}
-                className="group bg-white rounded-2xl p-8 shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
-              >
-                <div className={`w-14 h-14 rounded-2xl ${value.bg} flex items-center justify-center mb-6`}>
-                  <div className={`w-7 h-7 bg-gradient-to-br ${value.color} rounded-lg flex items-center justify-center`}>
-                    <value.icon className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-display font-bold text-gray-900 mb-3 group-hover:text-ocean-600 transition-colors">
-                  {value.title}
-                </h3>
-                <p className="text-gray-500 leading-relaxed">{value.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
-      <section className="bg-sand-50 py-32 px-6">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <p className="text-ocean-600 font-medium tracking-widest uppercase text-sm mb-4">Guest Stories</p>
-            <h2 className="text-5xl font-display font-bold text-gray-900 mb-4">What Our Guests Say</h2>
-            <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-              Real words from real guests who made Oceano Con Vista part of their most treasured memories.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="bg-white rounded-3xl p-8 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <Quote className="w-8 h-8 text-ocean-200" />
-                    <div className="flex space-x-1">
-                      {[...Array(t.rating)].map((_, s) => (
-                        <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-gray-600 leading-relaxed mb-6 italic">"{t.text}"</p>
-                </div>
-
-                <div>
-                  <div className="border-t border-gray-100 pt-5 flex items-center space-x-4">
-                    <img
-                      src={t.avatar}
-                      alt={t.name}
-                      className="w-12 h-12 rounded-full object-cover ring-2 ring-ocean-100"
-                    />
-                    <div>
-                      <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
-                      <p className="text-gray-400 text-xs">{t.location}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-ocean-500 font-medium mt-3 bg-ocean-50 rounded-full px-3 py-1 inline-block">
-                    {t.stay}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <section className="relative py-32 px-6 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1582719508461-905c673771fd?w=1920&q=80)' }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/95 to-ocean-700/80" />
-        <div className="relative z-10 max-w-4xl mx-auto text-center text-white">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
-          >
-            <h2 className="text-5xl md:text-6xl font-display font-bold mb-6 leading-tight">
-              Ready to Be Part of Our Story?
-            </h2>
-            <p className="text-xl text-white/75 mb-10 max-w-2xl mx-auto">
-              Every great stay becomes a memory. Let Oceano Con Vista be the backdrop to yours.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/rooms"
-                className="px-10 py-4 bg-white text-ocean-700 font-semibold rounded-xl hover:bg-ocean-50 transition-colors shadow-lg"
-              >
-                Book Your Stay
-              </Link>
-              <Link
-                to="/contact"
-                className="px-10 py-4 border-2 border-white/50 text-white font-semibold rounded-xl hover:bg-white/10 transition-colors"
-              >
-                Get in Touch
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
+    {/* ── Fan images — absolute, all bottom: 0 ── */}
+    <div style={{ position: 'relative', width: 1100, height: 460, flexShrink: 0 }}>
+      {FAN.map((img, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.25 + i * 0.08 }}
+          whileHover={{ y: -22, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }}
+          style={{
+            position: 'absolute',
+            bottom: img.bottom,
+            left: img.left,
+            width: img.w,
+            height: img.h,
+            borderRadius: 14,
+            overflow: 'hidden',
+            rotate: img.rotate,
+            transformOrigin: 'bottom center',
+            zIndex: img.z,
+            boxShadow: i === 2
+              ? '0 24px 64px rgba(30,54,36,0.20)'
+              : '0 10px 32px rgba(30,54,36,0.13)',
+            cursor: 'pointer',
+          }}
+        >
+          <img
+            src={img.src}
+            alt=""
+            draggable="false"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        </motion.div>
+      ))}
     </div>
-  );
-};
+  </section>
+);
+
+
+/* ─── Who We Are + Map ─── */
+const WhoWeAre = () => (
+  <section style={{ background: '#f5f2ec' }}>
+
+    {/* ── Text block ── */}
+    <motion.div
+      className="text-center"
+      initial={{ opacity: 0, y: 36 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div style={{ padding: '100px 40px 72px', maxWidth: 740, margin: '0 auto' }}>
+
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          fontSize: '1rem',
+          letterSpacing: '0.24em',
+          textTransform: 'uppercase',
+          color: 'rgba(30,54,36,0.95)',
+          marginBottom: 20,
+        }}>
+          Who We Are
+        </p>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
+          style={{
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontSize: 'clamp(2.8rem, 6vw, 5.2rem)',
+            fontWeight: 300,
+            color: '#1e3624',
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+            margin: '0 0 28px',
+          }}
+        >
+          An exquisite above<br /><em>Samal Island.</em>
+        </motion.h2>
+
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            width: 48, height: 1,
+            background: 'rgba(30,54,36,0.3)',
+            margin: '0 auto 28px',
+            transformOrigin: 'left',
+          }}
+        />
+
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, delay: 0.4 }}
+          style={{
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontSize: 'clamp(1rem, 1.5vw, 1.2rem)',
+            fontWeight: 500,
+            color: 'rgba(30,54,36,0.90)',
+            lineHeight: 1.85,
+            maxWidth: 560,
+            margin: '0 auto 44px',
+          }}
+        >
+          Oceano Con Vista sits on the hills of Island City Garden of Samal, Davao del Norte, Philippines — five rooms, each with an unobstructed view of the sea. More than a place to stay, it is a quiet retreat shaped by privacy, intimacy, and meaningful rest.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.55 }}
+        >
+          <Link to="/rooms"><Button variant="primary" size="lg">Explore Our Rooms</Button></Link>
+        </motion.div>
+
+      </div>
+    </motion.div>
+
+    {/* ── Full-width map ── */}
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 1.2, delay: 0.2 }}
+      style={{ width: '100%', height: '72vh', minHeight: 500 }}
+    >
+
+      
+      <iframe
+        title="Oceano Con Vista Location"
+        src="https://www.google.com/maps/embed?pb=!1m26!1m12!1m3!1d66314.38547938404!2d125.65359788085115!3d7.131189074874158!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m11!3e0!4m3!3m2!1d7.1207479!2d125.6737143!4m5!1s0x32f97b3c1ebeb72b%3A0x50bffe03d705fc0f!2sOCEANO%20CON%20VISTA%20HIGHLANDS%2C%20PUROK%206%2C%20Brgy%2C%20Samal%2C%20Davao%20del%20Norte!3m2!1d7.028742299999999!2d125.76448479999999!5e0!3m2!1sen!2sph!4v1776487173250!5m2!1sen!2sph"
+        width="100%"
+        height="100%"
+        style={{ border: 0, display: 'block', filter: 'grayscale(20%) contrast(1.02) brightness(0.97)' }}
+        allowFullScreen=""
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+    </motion.div>
+  </section>
+);
+
+/* ─── Our Values ─── */
+const VALUES = [
+  {
+    label: 'Serenity',
+    src: '/images/IMG_4536.jpg',
+    text: 'High above the sea, stillness is not merely an amenity — it is the experience itself. Oceano Con Vista was built around the belief that true rest begins when the noise of the world falls away and only the horizon remains.',
+  },
+  {
+    label: 'Nature',
+    src: '/images/IMG_4550.jpg',
+    text: 'Every detail of this retreat honours the landscape it inhabits. The rolling hills of Samal, the salt-touched breeze, the unfiltered light at dusk — nature here is not a backdrop. It is the host.',
+  },
+  {
+    label: 'Intimacy',
+    src: '/images/IMG_4537.jpg',
+    text: 'Five rooms. No crowds. No performance. Only the quiet assurance that you are cared for — not as a guest among many, but as the reason every thoughtful detail exists.',
+  },
+];
+
+const OurValues = () => (
+  <section style={{ background: '#f5f2ec', padding: '120px 0 30px' }}>
+
+    {/* ── Header ── */}
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+      style={{ textAlign: 'center', marginBottom: 100, padding: '0 40px' }}
+    >
+      <h2 style={{
+        fontFamily: "'Cormorant Garamond', Georgia, serif",
+        fontSize: 'clamp(5rem, 5vw, 4.4rem)',
+        fontWeight: 300,
+        color: '#1e3624',
+        letterSpacing: '-0.02em',
+        lineHeight: 1.1,
+        margin: 0,
+      }}>
+        Our Values
+      </h2>
+    </motion.div>
+
+    {/* ── Zigzag rows ── */}
+    {VALUES.map((val, i) => {
+      const isEven = i % 2 === 0;
+      return (
+        <div
+          key={val.label}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            maxWidth: 1080,
+            margin: '0 auto 150px',
+          }}
+        >
+          {/* Image */}
+          <motion.div
+            initial={{ opacity: 0, x: isEven ? -40 : 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              order: isEven ? 1 : 2,
+              overflow: 'hidden',
+              aspectRatio: '3.5 / 4.5',
+            }}
+          >
+            <motion.img
+              src={val.src}
+              alt={val.label}
+              draggable="false"
+              whileHover={{ scale: 1.04 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          </motion.div>
+
+          {/* Text */}
+          <motion.div
+            initial={{ opacity: 0, x: isEven ? 40 : -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            style={{
+              order: isEven ? 2 : 1,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              padding: 'clamp(40px, 6vw, 80px)',
+            }}
+          >
+            <h3 style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: 'clamp(2.4rem, 4vw, 3.6rem)',
+              fontWeight: 300,
+              color: '#1e3624',
+              letterSpacing: '-0.015em',
+              lineHeight: 1.1,
+              margin: '0 0 28px',
+            }}>
+              {val.label}
+            </h3>
+            <p style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: 'clamp(1.2rem, 1.6vw, 1.45rem)',
+              fontWeight: 400,
+              color: 'rgba(30,54,36,0.75)',
+              lineHeight: 1.85,
+              margin: 0,
+            }}>
+              {val.text}
+            </p>
+          </motion.div>
+
+        </div>
+      );
+    })}
+
+  </section>
+);
+
+
+/* ─── Page ─── */
+const About = () => (
+  <div style={{ minHeight: '100vh', overflow: 'hidden', background: '#f5f2ec' }}>
+    <FanHero />
+    <WhoWeAre />
+    <OurValues />
+    <Testimonials />
+  </div>
+);
 
 export default About;

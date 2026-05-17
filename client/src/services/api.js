@@ -69,3 +69,12 @@ export const requestsAPI = {
   create:       (data) => makeRequest('/requests', { method: 'POST', body: JSON.stringify(data) }),
   updateStatus: (id, status) => makeRequest(`/requests/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 };
+
+// Reviews API
+export const reviewsAPI = {
+  create:         (data) => makeRequest('/reviews', { method: 'POST', body: JSON.stringify(data) }),
+  getByRoom:      (roomId) => makeRequest(`/reviews/room/${roomId}`),
+  getUserReviews: () => makeRequest('/reviews/user'),
+  getAll:         () => makeRequest('/reviews/all'),
+  delete:         (id) => makeRequest(`/reviews/${id}`, { method: 'DELETE' }),
+};

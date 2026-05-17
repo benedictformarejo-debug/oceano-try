@@ -61,7 +61,7 @@ const Login = () => {
             <img
               src="/images/logo3.png"
               alt="Oceano Con Vista"
-              className="w-12 h-12 object-contain brightness-0 invert"
+              className="w-16 h-16 object-contain brightness-0 invert"
             />
             <span className="text-3xl font-display font-bold">Oceano Con Vista</span>
           </Link>
@@ -123,9 +123,9 @@ const Login = () => {
               <img
                 src="/images/logo3.png"
                 alt="Oceano Con Vista"
-                className="w-8 h-8 object-contain"
+                className="w-16 h-16 object-contain"
               />
-              <span className="text-2xl font-display font-bold text-gray-900">
+              <span className="text-3xl font-serif font-bold text-gray-900">
                 Oceano Con Vista
               </span>
             </Link>
@@ -136,10 +136,10 @@ const Login = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-3xl font-display font-bold text-gray-900 mb-2">
+            <h2 className="text-3xl font-display font-bold text-gray-900 mb-2 text-center lg:text-left">
               Sign In
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-600 mb-8 text-center lg:text-left">
               Don't have an account?{' '}
               <Link to="/register" className="text-ocean-600 hover:text-ocean-700 font-medium">
                 Sign up

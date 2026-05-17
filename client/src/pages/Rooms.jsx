@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Wifi, Tv, Wind, Beef, Music, Utensils } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Button from '../components/Button';
 
 const ROOM_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@200;300;400;700&display=swap');
@@ -100,7 +101,7 @@ const ROOM_CSS = `
     font-weight: 300;
     letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: #0369a1;
+    color: #9ca3af;
   }
 `;
 
@@ -203,7 +204,7 @@ const Rooms = () => {
   const goTo = (index) => setActiveIndex(index);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: '#f5f2ec' }}>
 
       {/* ══════════════════════════════════════
           HERO — 100vh so navbar overlays transparently
@@ -259,14 +260,9 @@ const Rooms = () => {
               &nbsp;&nbsp;/ night
             </p>
 
-            {/* Book Now — exact same style as navbar transparent button */}
-            <button
-              onClick={() => navigate(`/rooms/${room.id}`)}
-              className="room-book-btn"
-            >
-              <span>Book Now</span>
-              <span>→</span>
-            </button>
+            <Button onClick={() => navigate(`/rooms/${room.id}`)} variant="secondary" size="lg">
+            Book Now →
+            </Button>
           </motion.div>
         </AnimatePresence>
 
@@ -299,7 +295,7 @@ const Rooms = () => {
       {/* ══════════════════════════════════════
           GALLERY STRIP
       ══════════════════════════════════════ */}
-        <div className="py-3" style={{ background: '#fff' }}>
+        <div className="py-3" style={{ background: '#f5f2ec' }}>
           <div className="grid grid-cols-3" style={{ gap: 6, gridTemplateColumns: '1fr 1.4fr 1fr' }}>
             {room.images.map((img, i) => (
               <div key={i} className="overflow-hidden" style={{ height: 320 }}>
@@ -333,20 +329,20 @@ const Rooms = () => {
           {/* Right – Facilities */}
           <div>
             <h2 className="facilities-heading text-gray-900 mb-8" style={{ fontSize: 44 }}>
-              Facilities
+              Amenities
             </h2>
 
             <div className="space-y-3 mb-8">
               <div className="flex items-center gap-4 text-gray-600">
-                <div className="w-9 h-9 rounded-xl bg-ocean-50 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-4 h-4 text-ocean-600" />
+                <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-6 h-6 text-emerald-900" />
                 </div>
                 <span className="text-gray-700">Up to {room.capacity} guests</span>
               </div>
               {room.features.map(({ icon: Icon, label }, i) => (
                 <div key={i} className="flex items-center gap-4 text-gray-600">
-                  <div className="w-9 h-9 rounded-xl bg-ocean-50 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-ocean-600" />
+                  <div className="w-9 h-9 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-6 h-6 text-emerald-900" />
                   </div>
                   <span className="text-gray-700">{label}</span>
                 </div>
@@ -358,7 +354,7 @@ const Rooms = () => {
               {room.amenities.map((a, i) => (
                 <span
                   key={i}
-                  className="px-4 py-2 bg-ocean-50 text-ocean-700 rounded-full text-sm font-medium"
+                  className="px-4 py-2 text-emerald-900 text-sm font-medium"
                 >
                   {a}
                 </span>
@@ -374,17 +370,14 @@ const Rooms = () => {
                 </span>
                 <span className="text-gray-500 ml-2 text-sm">/ night</span>
               </div>
-              <button
-                onClick={() => navigate(`/rooms/${room.id}`)}
-                className="bg-ocean-600 hover:bg-ocean-700 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 text-sm shadow-lg hover:shadow-xl"
-              >
-                View Details & Book
-              </button>
+             <Button onClick={() => navigate(`/rooms/${room.id}`)} variant="primary" size="lg">
+              View Details & Book
+              </Button>
             </div>
           </div>
         </div>
 
-      {/* ── Bottom dot nav (gold) ── */}
+      {/* ── Bottom dot nav ── */}
       <div className="flex justify-center items-center gap-3 pb-16">
         {rooms.map((r, i) => (
           <button
@@ -396,7 +389,7 @@ const Rooms = () => {
               width:      i === activeIndex ? 28 : 8,
               height:     8,
               borderRadius: 999,
-              background: i === activeIndex ? '#21aeeb' : '#d9d0c4',
+              background: i === activeIndex ? '#064e3b' : '#d9d0c4',
               border:     'none',
               padding:    0,
               cursor:     'pointer',

@@ -8,6 +8,8 @@ import roomRoutes from './routes/rooms.js';
 import usersRoutes from './routes/users.js';
 import settingsRoutes from './routes/settings.js';
 import requestsRoutes from './routes/requests.js';
+import reviewsRoutes from './routes/reviews.js';
+
 
 
 dotenv.config();
@@ -27,6 +29,8 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/users', usersRoutes);  // 👈 just add this line
 app.use('/api/settings', settingsRoutes);
 app.use('/api/requests', requestsRoutes);
+app.use('/api/reviews', reviewsRoutes);
+
 
 
 

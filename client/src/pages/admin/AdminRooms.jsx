@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, X, Save, Users, DollarSign } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { roomsAPI } from '../../services/api';
-import { Home, CalendarDays, BedDouble, Wallet, FileText, Settings } from 'lucide-react';
+import { Home, CalendarDays, BedDouble, Wallet, Star, FileText, Settings } from 'lucide-react';
 
 const menuItems = [
   { path: '/admin',              label: 'Overview',        icon: Home        },
   { path: '/admin/reservations', label: 'Reservations',    icon: CalendarDays},
   { path: '/admin/rooms',        label: 'Room Management', icon: BedDouble   },
   { path: '/admin/users',        label: 'User Management', icon: Users       },
+  { path: '/admin/reviews',      label: 'Reviews',         icon: Star        },
   { path: '/admin/finance',      label: 'Finance',         icon: Wallet      },
   { path: '/admin/reports',      label: 'Reports',         icon: FileText    },
   { path: '/admin/settings',     label: 'Settings',        icon: Settings    },

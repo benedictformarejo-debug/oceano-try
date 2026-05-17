@@ -6,7 +6,7 @@ RESORT DETAILS:
 - Location: Purok 6, Barangay Aumbay, Island Garden City of Samal., Samal, Philippines, 8119
 - Contact: oceanoconvista@gmail.com
 - Booking: Guests can book directly on our website or visit /rooms to browse available rooms
-- Manage Booking: Guests can manage their booking at /manage-booking using their reference code and email
+- Manage Booking: Guests can manage their booking using the link which will be sent to their email after booking (unregistered users) while registered users can manage through their account dashboard
 
 ROOMS (all rates per night):
 - Oceanus Room: capacity 2 guests — intimate and cozy ocean-view room
@@ -19,7 +19,7 @@ BOOKING POLICY:
 - Bookings are subject to resort confirmation after payment
 - Guests can pay in full or 50% downpayment (balance paid upon arrival)
 - Payment methods: GCash, Maya, Credit/Debit Card, GrabPay via PayMongo
-- Cancellations can be made via /manage-booking before check-in
+- Cancellations can be made via link sent to users email or in their account dashboard before check-in
 - A unique reference code (e.g. OCV-XXXX) is sent to the guest's email after booking
 
 GENERAL POLICIES:
@@ -27,15 +27,14 @@ GENERAL POLICIES:
 - Special requests can be submitted during booking
 - Login is optional — guests can book as visitors and manage via reference code
 
-Keep responses concise (2-4 sentences), warm, and professional. If asked about real-time availability or pricing, direct them to the Rooms page or the booking form. If asked about an existing booking, direct them to /manage-booking.
+Keep responses concise (2-4 sentences), warm, and professional. If asked about real-time availability or pricing, direct them to the Rooms page or the booking form. If asked about an existing booking, direct them to their account dashboard or the link sent to their email.
 
 Never break character. You are always Coral, the friendly AI concierge of Oceano Con Vista.`;
 
 
-//Suggestions for quick start
+// Suggestions for quick start (3 only)
 const SUGGESTIONS = [
- "Tell me about the resort",
-  "What rooms are available?",
+  "Tell me about the resort",
   "How do I make a booking?",
   "Tell me about the amenities",
 ];
@@ -83,24 +82,22 @@ export default function HotelChatbot() {
     setLoading(true);
     try {
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
-  },
-  body: JSON.stringify({
-    model: "llama-3.3-70b-versatile",
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...newMessages.map((m) => ({ role: m.role, content: m.content })),
-    ],
-  }),
-});
-const data = await res.json();
-const reply = data.choices?.[0]?.message?.content || "I apologize, I seem to be having a moment. Please try again.";
-setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-
-
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            ...newMessages.map((m) => ({ role: m.role, content: m.content })),
+          ],
+        }),
+      });
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content || "I apologize, I seem to be having a moment. Please try again.";
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "My apologies — I'm having trouble connecting. Please try again shortly." }]);
     } finally {
@@ -144,7 +141,7 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
         /* Header */
         .ocv-header {
-          background: #0891b2;
+          background: #064e3b;
           padding: 14px 16px;
           display: flex; align-items: center; gap: 10px;
           flex-shrink: 0;
@@ -176,7 +173,7 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
         /* Welcome */
         .ocv-welcome {
-          flex: 1; padding: 24px 20px 16px;
+          flex: 1; padding: 18px 20px 14px;
           background: #f9fafb;
           display: flex; flex-direction: column; align-items: center;
         }
@@ -185,7 +182,7 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
           background: #0891b2;
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 14px;
-          box-shadow: 0 4px 16px rgba(29,78,216,0.3);
+          box-shadow: 0 4px 16px rgba(2,44,34,0.3);
         }
         .ocv-welcome-title {
           font-size: 17px; font-weight: 600; color: #111827;
@@ -193,7 +190,7 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
         }
         .ocv-welcome-sub {
           font-size: 13px; color: #6b7280; text-align: center;
-          margin-bottom: 20px; line-height: 1.5;
+          margin-bottom: 16px; line-height: 1.5;
         }
         .ocv-suggestions { display: flex; flex-direction: column; gap: 8px; width: 100%; }
         .ocv-suggestion {
@@ -205,15 +202,15 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
           transition: all 0.15s;
         }
         .ocv-suggestion:hover {
-          border-color: #0891b2; color: #0891b2;
-          background: #eff6ff;
+          border-color: #000000; color: #111827;
+          background: #f0fdf4;
         }
 
         /* Messages */
         .ocv-messages {
           flex: 1; overflow-y: auto; padding: 14px 16px;
           display: flex; flex-direction: column; gap: 10px;
-          background: #f9fafb; min-height: 390px; max-height: 390px;
+          background: #f9fafb; min-height: 300px; max-height: 300px;
         }
         .ocv-messages::-webkit-scrollbar { width: 4px; }
         .ocv-messages::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
@@ -223,7 +220,7 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
 
         .ocv-msg-avatar {
           width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-          background: #0891b2;
+          background: #064e3b;
           display: flex; align-items: center; justify-content: center;
         }
 
@@ -238,7 +235,7 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
           box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
         .ocv-bubble.user {
-          background: #0891b2; color: white;
+          background: #064e3b; color: white;
           border-radius: 16px 16px 4px 16px;
         }
 
@@ -267,40 +264,39 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
           font-size: 14px; color: #111827; background: #f9fafb;
           outline: none; transition: border-color 0.15s, background 0.15s;
         }
-        .ocv-input:focus { border-color: #0891b2; background: white; }
+        .ocv-input:focus { border-color: #064e3b; background: white; }
         .ocv-input::placeholder { color: #9ca3af; }
         .ocv-send {
           width: 38px; height: 38px; border-radius: 10px; border: none; flex-shrink: 0;
-          background: #0891b2; color: white; cursor: pointer;
+          background: #064e3b; color: white; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
           transition: background 0.15s, opacity 0.15s;
         }
-        .ocv-send:hover:not(:disabled) { background: #0a6fb2; }
+        .ocv-send:hover:not(:disabled) { background: #064e3b; }
         .ocv-send:disabled { opacity: 0.4; cursor: default; }
 
         /* FAB */
         .ocv-fab {
-  width: 50px; height: 50px; border-radius: 50%;
-  background: #0683a1;
-  border: none;
-  box-shadow: 0 4px 20px rgba(29,78,216,0.45);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-  animation: fab-bounce 1.8s ease-in-out infinite;  /* ADD THIS */
-}
-.ocv-fab:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 24px rgba(29,78,216,0.55);
-  animation-play-state: paused;  /* ADD THIS - stops bouncing on hover */
-}
+          width: 50px; height: 50px; border-radius: 50%;
+          background: #064e3b;
+          border: none;
+          box-shadow: 0 4px 20px rgba(2,44,34,0.45);
+          cursor: pointer; display: flex; align-items: center; justify-content: center;
+          transition: transform 0.2s, box-shadow 0.2s;
+          animation: fab-bounce 1.8s ease-in-out infinite;
+        }
+        .ocv-fab:hover {
+          transform: scale(1.08);
+          box-shadow: 0 6px 24px rgba(2,44,34,0.55);
+          animation-play-state: paused;
+        }
 
-/* ADD THIS NEW KEYFRAME */
-@keyframes fab-bounce {
-  0%, 100% { transform: translateY(0); }
-  30%       { transform: translateY(-10px); }
-  50%       { transform: translateY(-6px); }
-  70%       { transform: translateY(-10px); }
-}
+        @keyframes fab-bounce {
+          0%, 100% { transform: translateY(0); }
+          30%       { transform: translateY(-10px); }
+          50%       { transform: translateY(-6px); }
+          70%       { transform: translateY(-10px); }
+        }
 
         @media (max-width: 420px) {
           .ocv-window { width: calc(100vw - 32px); }
@@ -335,8 +331,7 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
             {/* Welcome */}
             {!started ? (
               <div className="ocv-welcome">
-                <img src="images/robot.png" width={80} height={80} style={{ borderRadius: "0%", objectFit: "cover", marginBottom: "14px" }} 
-                />
+                <img src="images/chatbot.png" width={70} height={70} style={{ borderRadius: "0%", objectFit: "cover", marginBottom: "12px" }} />
                 <div className="ocv-welcome-title">Hi, I'm Coral 👋</div>
                 <div className="ocv-welcome-sub">Your concierge at Oceano Con Vista.<br/>How can I help you today?</div>
                 <div className="ocv-suggestions">
@@ -409,11 +404,11 @@ setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
         )}
 
         {/* FAB */}
-{!open && (
-  <button className="ocv-fab" onClick={() => setOpen(true)} aria-label="Chat with Coral">
-    <BotIcon size={40} color="white" />
-  </button>
-)}
+        {!open && (
+          <button className="ocv-fab" onClick={() => setOpen(true)} aria-label="Chat with Coral">
+            <BotIcon size={40} color="white" />
+          </button>
+        )}
 
       </div>
     </>

@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Users, Wifi, Utensils, Beef, Tv, Wind,
-  ChevronLeft, ChevronRight, X, Music, Clock
+  ChevronLeft, ChevronRight, X, Music, Star, Clock
 } from 'lucide-react';
-import { bookingsAPI } from '../services/api';
+import { bookingsAPI, reviewsAPI } from '../services/api';
 
 
 const ARRIVAL_TIMES = [
@@ -27,10 +27,12 @@ const RoomDetail = () => {
   const [selectedMonth, setSelectedMonth]           = useState(new Date());
   const [selectedDates, setSelectedDates]           = useState({ checkIn: null, checkOut: null });
   const [guests, setGuests]                         = useState(1);
-  const [arrivalTime, setArrivalTime] = useState('14:00'); // ← ADD THIS
+  const [arrivalTime, setArrivalTime] = useState('14:00');
   const [bookingError, setBookingError]             = useState('');
   const [bookedDates, setBookedDates]               = useState([]);
   const [loadingDates, setLoadingDates]             = useState(true);
+  const [reviews,        setReviews]                = useState([]);
+  const [loadingReviews, setLoadingReviews]         = useState(true);
 
   const allRooms = [
     {
@@ -107,7 +109,6 @@ const RoomDetail = () => {
 
   const room = allRooms.find(r => r.id === roomId);
 
-  // ── Fetch real booked dates from API ─────────────────────────────────────
   useEffect(() => {
     if (!room) { navigate('/rooms'); return; }
     const fetchDates = async () => {
@@ -126,9 +127,16 @@ const RoomDetail = () => {
       }
     };
     fetchDates();
-}, [roomId]);
+  }, [roomId]);
 
-  // ── Calendar helpers ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!room) return;
+    reviewsAPI.getByRoom(roomId)
+      .then(data => setReviews(data.reviews || []))
+      .catch(() => {})
+      .finally(() => setLoadingReviews(false));
+  }, [roomId]);
+
   const getDaysInMonth = (date) => {
     const year = date.getFullYear(), month = date.getMonth();
     const startDOW    = new Date(year, month, 1).getDay();
@@ -167,7 +175,6 @@ const RoomDetail = () => {
 
   const handleDateClick = (date) => {
     if (!date || isDateBooked(date) || isDateInPast(date)) return;
-
     if (!selectedDates.checkIn || (selectedDates.checkIn && selectedDates.checkOut)) {
       setSelectedDates({ checkIn: date, checkOut: null }); return;
     }
@@ -189,8 +196,6 @@ const RoomDetail = () => {
 
   const calculateTotal = () => calculateNights() * room.price;
 
-
-// ── Date helper to avoid UTC timezone shift ───────────────────────────────
   const toLocalDate = (date) => {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -198,7 +203,10 @@ const RoomDetail = () => {
     return `${y}-${m}-${d}`;
   };
 
-  // ── Booking — no login required, go straight to confirmation ─────────────
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
+
   const handleBooking = () => {
     if (!selectedDates.checkIn || !selectedDates.checkOut) {
       setBookingError('Please select check-in and check-out dates'); return;
@@ -212,7 +220,7 @@ const RoomDetail = () => {
           roomImage:     room.images[0],
           checkIn:  toLocalDate(selectedDates.checkIn),
           checkOut: toLocalDate(selectedDates.checkOut),
-          arrivalTime,  // ← ADD THIS
+          arrivalTime,
           guests,
           nights:        calculateNights(),
           pricePerNight: room.price,
@@ -228,11 +236,15 @@ const RoomDetail = () => {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   return (
-    <div className="min-h-screen pt-20 pb-16 bg-gray-50">
+    <div className="min-h-screen pt-20 pb-16" style={{ background: '#f5f2ec' }}>
+
       {/* Back Button */}
       <div className="max-w-7xl mx-auto px-6 pt-8">
-        <button onClick={() => navigate('/rooms')}
-          className="flex items-center space-x-2 text-gray-600 hover:text-ocean-600 transition-colors mb-6">
+        <button
+          onClick={() => navigate('/rooms')}
+          className="flex items-center space-x-2 transition-colors mb-6"
+          style={{ color: 'rgba(30,54,36,0.6)' }}
+        >
           <ArrowLeft className="w-5 h-5" />
           <span className="font-medium">Back to Rooms</span>
         </button>
@@ -268,64 +280,171 @@ const RoomDetail = () => {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900 mb-4">{room.name}</h1>
-              <div className="flex items-center space-x-4 text-gray-600">
+              <h1
+                className="text-4xl md:text-5xl font-display font-bold mb-4"
+                style={{ color: '#1e3624' }}
+              >
+                {room.name}
+              </h1>
+              <div className="flex items-center space-x-4" style={{ color: 'rgba(30,54,36,0.6)' }}>
                 <div className="flex items-center space-x-2">
                   <Users className="w-5 h-5" />
                   <span>Up to {room.capacity} Guests</span>
                 </div>
                 <span>•</span>
-                <span className="text-3xl font-display font-bold text-ocean-600">₱{room.price.toLocaleString()}</span>
+                <span className="text-3xl font-display font-bold" style={{ color: '#1e3624' }}>
+                  ₱{room.price.toLocaleString()}
+                </span>
                 <span>/ night</span>
               </div>
             </div>
 
-            <p className="text-gray-600 leading-relaxed text-lg">{room.longDescription}</p>
+            <p className="leading-relaxed text-lg" style={{ color: 'rgba(30,54,36,0.7)' }}>
+              {room.longDescription}
+            </p>
 
+            {/* Features */}
             <div>
-              <h2 className="text-2xl font-display font-bold text-gray-900 mb-6">Features</h2>
+              <h2 className="text-2xl font-display font-bold mb-6" style={{ color: '#1e3624' }}>
+                Features
+              </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {room.features.map((feature, idx) => (
                   <div key={idx} className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-ocean-50 rounded-2xl flex items-center justify-center mb-3">
-                      <feature.icon className="w-8 h-8 text-ocean-600" />
+                    <div className="mb-3">
+                      <feature.icon className="w-8 h-8" style={{ color: '#1e3624' }} />
                     </div>
-                    <span className="text-sm text-gray-700 font-medium">{feature.label}</span>
+                    <span className="text-sm font-medium" style={{ color: 'rgba(30,54,36,0.75)' }}>
+                      {feature.label}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Amenities */}
             <div>
-              <h2 className="text-2xl font-display font-bold text-gray-900 mb-6">Amenities</h2>
+              <h2 className="text-2xl font-display font-bold mb-6" style={{ color: '#1e3624' }}>
+                Amenities
+              </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {room.amenities.map((amenity, idx) => (
                   <div key={idx} className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-ocean-600 rounded-full" />
-                    <span className="text-gray-700">{amenity}</span>
+                    <div className="w-2 h-2 rounded-full" style={{ background: '#1e3624' }} />
+                    <span style={{ color: 'rgba(30,54,36,0.75)' }}>{amenity}</span>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Reviews */}
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <h2 className="text-2xl font-display font-bold" style={{ color: '#1e3624' }}>
+                  Guest Reviews
+                </h2>
+                {avgRating && (
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full"
+                    style={{ background: 'rgba(30,54,36,0.08)' }}
+                  >
+                    <Star className="w-4 h-4" style={{ fill: '#1e3624', color: '#1e3624' }} />
+                    <span className="text-sm font-bold" style={{ color: '#1e3624' }}>{avgRating}</span>
+                    <span className="text-xs" style={{ color: 'rgba(30,54,36,0.4)' }}>({reviews.length})</span>
+                  </div>
+                )}
+              </div>
+
+              {loadingReviews ? (
+                <div className="space-y-4">
+                  {[...Array(2)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-xl p-5 animate-pulse space-y-2"
+                      style={{ background: '#fff', border: '1px solid rgba(30,54,36,0.08)' }}
+                    >
+                      <div className="h-4 bg-gray-100 rounded w-1/4" />
+                      <div className="h-3 bg-gray-100 rounded w-1/3" />
+                      <div className="h-8 bg-gray-100 rounded" />
+                    </div>
+                  ))}
+                </div>
+              ) : reviews.length === 0 ? (
+                <div
+                  className="rounded-xl p-8 text-center"
+                  style={{ background: 'rgba(30,54,36,0.04)' }}
+                >
+                  <Star className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(30,54,36,0.2)' }} />
+                  <p className="text-sm" style={{ color: 'rgba(30,54,36,0.4)' }}>
+                    No reviews yet. Be the first to stay!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((r, i) => (
+                    <motion.div
+                      key={r.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="rounded-xl p-5 shadow-sm"
+                      style={{ background: '#fff', border: '1px solid rgba(30,54,36,0.1)' }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-semibold text-sm" style={{ color: '#1e3624' }}>
+                          {r.guest_name || 'Guest'}
+                        </p>
+                        <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(s => (
+                            <Star
+                              key={s}
+                              className="w-3.5 h-3.5"
+                              style={s <= r.rating
+                                ? { fill: '#1e3624', color: '#1e3624' }
+                                : { fill: 'none', color: 'rgba(30,54,36,0.2)' }
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs mb-2" style={{ color: 'rgba(30,54,36,0.4)' }}>
+                        {new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      {r.comment && (
+                        <p className="text-sm leading-relaxed" style={{ color: 'rgba(30,54,36,0.7)' }}>
+                          {r.comment}
+                        </p>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Right Column — Booking Card */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-xl p-8 sticky top-24">
-              <h3 className="text-2xl font-display font-bold text-gray-900 mb-6">Reserve Your Stay</h3>
+              <h3 className="text-2xl font-display font-bold mb-6" style={{ color: '#1e3624' }}>
+                Reserve Your Stay
+              </h3>
 
               {/* Calendar */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
-                  <button onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1))}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  <button
+                    onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1))}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
-                  <h4 className="font-semibold text-gray-900">
+                  <h4 className="font-semibold" style={{ color: '#1e3624' }}>
                     {monthNames[selectedMonth.getMonth()]} {selectedMonth.getFullYear()}
                   </h4>
-                  <button onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1))}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  <button
+                    onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1))}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
@@ -338,7 +457,10 @@ const RoomDetail = () => {
 
                 {loadingDates ? (
                   <div className="flex items-center justify-center h-32">
-                    <div className="w-6 h-6 border-2 border-ocean-600 border-t-transparent rounded-full animate-spin" />
+                    <div
+                      className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin"
+                      style={{ borderColor: '#1e3624', borderTopColor: 'transparent' }}
+                    />
                   </div>
                 ) : (
                   <div className="grid grid-cols-7 gap-2">
@@ -351,16 +473,27 @@ const RoomDetail = () => {
                       const isDisabled = !date || isBooked || isPast;
 
                       return (
-                        <button key={idx} onClick={() => handleDateClick(date)} disabled={isDisabled}
+                        <button
+                          key={idx}
+                          onClick={() => handleDateClick(date)}
+                          disabled={isDisabled}
+                          style={{
+                            background: isStart || isEnd
+                              ? '#1e3624'
+                              : isInRange && !isStart && !isEnd
+                              ? 'rgba(30,54,36,0.1)'
+                              : undefined,
+                          }}
                           className={[
                             'aspect-square rounded-lg text-sm font-medium transition-all duration-150',
                             !date ? 'invisible' : '',
                             isPast ? 'text-gray-300 cursor-not-allowed' : '',
                             !isPast && isBooked ? 'bg-red-100 text-red-400 line-through cursor-not-allowed' : '',
-                            isStart || isEnd ? 'bg-ocean-600 text-white scale-105 shadow-md' : '',
-                            isInRange && !isStart && !isEnd ? 'bg-ocean-100 text-ocean-800 rounded-none' : '',
-                            !isDisabled && !isInRange ? 'hover:bg-ocean-50 text-gray-700 hover:scale-105' : '',
-                          ].join(' ')}>
+                            isStart || isEnd ? 'text-white scale-105 shadow-md' : '',
+                            isInRange && !isStart && !isEnd ? 'text-green-900 rounded-none' : '',
+                            !isDisabled && !isInRange ? 'hover:bg-gray-100 text-gray-700 hover:scale-105' : '',
+                          ].join(' ')}
+                        >
                           {date?.getDate()}
                         </button>
                       );
@@ -370,44 +503,59 @@ const RoomDetail = () => {
 
                 <div className="mt-4 space-y-1.5 text-xs">
                   {[
-                    { bg: 'bg-ocean-600', label: 'Selected / Range ends'  },
-                    { bg: 'bg-red-100',   label: 'Unavailable / Booked'   },
-                    { bg: 'bg-gray-100',  label: 'Past date'              },
-                  ].map(({ bg, label }) => (
+                    { style: { background: '#1e3624' },   label: 'Selected / Range ends' },
+                    { style: { background: '#fee2e2' },   label: 'Unavailable / Booked'  },
+                    { style: { background: '#f3f4f6' },   label: 'Past date'             },
+                  ].map(({ style, label }) => (
                     <div key={label} className="flex items-center space-x-2">
-                      <div className={`w-4 h-4 ${bg} rounded`} />
-                      <span className="text-gray-600">{label}</span>
+                      <div className="w-4 h-4 rounded" style={style} />
+                      <span style={{ color: 'rgba(30,54,36,0.6)' }}>{label}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Arrival Time */}
-<div className="mb-5">
-  <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-2">
-    <Clock className="w-4 h-4 text-gray-400" />
-    Estimated Arrival Time
-  </label>
-  <div className="relative">
-    <select
-      value={arrivalTime}
-      onChange={e => setArrivalTime(e.target.value)}
-      className="w-full appearance-none px-4 py-3 pr-10 border border-gray-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-ocean-500 focus:border-transparent cursor-pointer hover:border-gray-400 transition-colors"
-    >
-      {ARRIVAL_TIMES.map(t => (
-        <option key={t} value={t}>{formatTime(t)}</option>
-      ))}
-    </select>
-    <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 rotate-90 pointer-events-none" />
-  </div>
-  <p className="text-xs text-gray-400 mt-1.5">Standard check-in starts at 2:00 PM</p>
-</div>
+              <div className="mb-5">
+                <label
+                  className="flex items-center gap-1.5 text-sm font-medium mb-2"
+                  style={{ color: 'rgba(30,54,36,0.8)' }}
+                >
+                  <Clock className="w-4 h-4" style={{ color: 'rgba(30,54,36,0.4)' }} />
+                  Estimated Arrival Time
+                </label>
+                <div className="relative">
+                  <select
+                    value={arrivalTime}
+                    onChange={e => setArrivalTime(e.target.value)}
+                    className="w-full appearance-none px-4 py-3 pr-10 border border-gray-300 rounded-xl text-sm bg-white cursor-pointer hover:border-gray-400 transition-colors"
+                    style={{ color: '#1e3624' }}
+                  >
+                    {ARRIVAL_TIMES.map(t => (
+                      <option key={t} value={t}>{formatTime(t)}</option>
+                    ))}
+                  </select>
+                  <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 rotate-90 pointer-events-none" />
+                </div>
+                <p className="text-xs mt-1.5" style={{ color: 'rgba(30,54,36,0.4)' }}>
+                  Standard check-in starts at 2:00 PM
+                </p>
+              </div>
 
               {/* Guests */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Number of Guests</label>
-                <select value={guests} onChange={e => setGuests(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-ocean-500 focus:border-transparent">
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'rgba(30,54,36,0.8)' }}
+                >
+                  Number of Guests
+                </label>
+                <select
+                  value={guests}
+                  onChange={e => setGuests(parseInt(e.target.value))}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+                  style={{ color: '#1e3624' }}
+                >
                   {[...Array(room.capacity)].map((_, i) => (
                     <option key={i + 1} value={i + 1}>{i + 1} {i === 0 ? 'Guest' : 'Guests'}</option>
                   ))}
@@ -416,7 +564,10 @@ const RoomDetail = () => {
 
               {/* Summary */}
               {selectedDates.checkIn && selectedDates.checkOut && (
-                <div className="bg-ocean-50 rounded-2xl p-4 mb-6">
+                <div
+                  className="rounded-2xl p-4 mb-6"
+                  style={{ background: 'rgba(30,54,36,0.06)' }}
+                >
                   <div className="space-y-2 text-sm">
                     {[
                       ['Check-in',  selectedDates.checkIn.toLocaleDateString()],
@@ -425,13 +576,16 @@ const RoomDetail = () => {
                       ['Nights',    calculateNights()],
                     ].map(([label, value]) => (
                       <div key={label} className="flex justify-between">
-                        <span className="text-gray-600">{label}:</span>
-                        <span className="font-medium text-gray-900">{value}</span>
+                        <span style={{ color: 'rgba(30,54,36,0.6)' }}>{label}:</span>
+                        <span className="font-medium" style={{ color: '#1e3624' }}>{value}</span>
                       </div>
                     ))}
-                    <div className="border-t border-ocean-200 pt-2 mt-2 flex justify-between items-center">
-                      <span className="text-gray-900 font-semibold">Total:</span>
-                      <span className="text-2xl font-display font-bold text-ocean-600">
+                    <div
+                      className="pt-2 mt-2 flex justify-between items-center"
+                      style={{ borderTop: '1px solid rgba(30,54,36,0.15)' }}
+                    >
+                      <span className="font-semibold" style={{ color: '#1e3624' }}>Total:</span>
+                      <span className="text-2xl font-display font-bold" style={{ color: '#1e3624' }}>
                         ₱{calculateTotal().toLocaleString()}
                       </span>
                     </div>
@@ -445,9 +599,12 @@ const RoomDetail = () => {
                 </div>
               )}
 
-              <button onClick={handleBooking}
+              <button
+                onClick={handleBooking}
                 disabled={!selectedDates.checkIn || !selectedDates.checkOut}
-                className="w-full bg-ocean-600 hover:bg-ocean-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-8 rounded-xl transition-colors shadow-lg disabled:shadow-none">
+                className="w-full disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-8 rounded-xl transition-colors shadow-lg disabled:shadow-none"
+                style={{ background: !selectedDates.checkIn || !selectedDates.checkOut ? undefined : '#1e3624' }}
+              >
                 Confirm Booking
               </button>
             </div>
@@ -459,26 +616,39 @@ const RoomDetail = () => {
       {/* Image Modal */}
       <AnimatePresence>
         {showImageModal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setShowImageModal(false)}
-            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
-            <button onClick={() => setShowImageModal(false)}
-              className="absolute top-8 right-8 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors">
+            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+          >
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute top-8 right-8 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+            >
               <X className="w-6 h-6" />
             </button>
-            <button onClick={e => { e.stopPropagation(); setSelectedImageIndex(p => p === 0 ? room.images.length - 1 : p - 1); }}
-              className="absolute left-8 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors">
+            <button
+              onClick={e => { e.stopPropagation(); setSelectedImageIndex(p => p === 0 ? room.images.length - 1 : p - 1); }}
+              className="absolute left-8 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+            >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <button onClick={e => { e.stopPropagation(); setSelectedImageIndex(p => p === room.images.length - 1 ? 0 : p + 1); }}
-              className="absolute right-8 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors">
+            <button
+              onClick={e => { e.stopPropagation(); setSelectedImageIndex(p => p === room.images.length - 1 ? 0 : p + 1); }}
+              className="absolute right-8 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+            >
               <ChevronRight className="w-6 h-6" />
             </button>
-            <motion.img key={selectedImageIndex}
-              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-              src={room.images[selectedImageIndex]} alt={room.name}
+            <motion.img
+              key={selectedImageIndex}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              src={room.images[selectedImageIndex]}
+              alt={room.name}
               className="max-w-full max-h-[90vh] object-contain rounded-2xl"
-              onClick={e => e.stopPropagation()} />
+              onClick={e => e.stopPropagation()}
+            />
           </motion.div>
         )}
       </AnimatePresence>

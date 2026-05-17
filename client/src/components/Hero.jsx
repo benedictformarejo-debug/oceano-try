@@ -146,7 +146,7 @@ const Hero = () => {
             className="pointer-events-auto px-10 py-3 border border-white/70 text-white/90 rounded-full text-xs tracking-[0.2em] uppercase font-light transition-all duration-300 hover:bg-white hover:text-black hover:border-white"
             style={{ backdropFilter: 'blur(4px)', background: 'rgba(255,255,255,0.05)' }}
           >
-            View Suites
+            View Rooms
           </motion.button>
         </motion.div>
 

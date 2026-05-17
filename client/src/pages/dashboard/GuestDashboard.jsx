@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Calendar, CreditCard, BookOpen, Home as HomeIcon, Info, Bed, Image, Mail } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, CreditCard, BookOpen, Home as HomeIcon, Info, Bed, Image, Mail, Star, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
-import { bookingsAPI } from '../../services/api';
+import { bookingsAPI, reviewsAPI } from '../../services/api';
 
 const publicMenuItems = [
   { path: '/',        label: 'Home',    icon: HomeIcon },
@@ -15,9 +15,10 @@ const publicMenuItems = [
 ];
 
 const dashboardMenuItems = [
-  { path: '/dashboard',          label: 'Overview',    icon: HomeIcon  },
-  { path: '/dashboard/bookings', label: 'My Bookings', icon: BookOpen  },
-  { path: '/dashboard/payments', label: 'Payments',    icon: CreditCard},
+  { path: '/dashboard',         label: 'Overview',    icon: HomeIcon  },
+  { path: '/dashboard/bookings',label: 'My Bookings', icon: BookOpen  },
+  { path: '/dashboard/payments',label: 'Payments',    icon: CreditCard},
+  { path: '/dashboard/reviews', label: 'My Reviews',  icon: Star      },
 ];
 
 const statusStyles = {
@@ -28,26 +29,129 @@ const statusStyles = {
   'checked-out':'bg-gray-100 text-gray-600',
 };
 
+// ── Star Rating Component ─────────────────────────────────────────────────────
+const StarRating = ({ value, onChange }) => (
+  <div className="flex gap-1">
+    {[1,2,3,4,5].map(star => (
+      <button key={star} onClick={() => onChange(star)} type="button"
+        className="transition-transform hover:scale-110">
+        <Star className={`w-8 h-8 ${star <= value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+      </button>
+    ))}
+  </div>
+);
+
+// ── Review Modal ──────────────────────────────────────────────────────────────
+const ReviewModal = ({ booking, onClose, onSubmit }) => {
+  const [rating,  setRating]  = useState(0);
+  const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState('');
+
+  const handleSubmit = async () => {
+    if (rating === 0) { setError('Please select a rating.'); return; }
+    try {
+      setLoading(true);
+      await onSubmit({ bookingId: booking.id, roomId: booking.roomId, roomName: booking.roomName, rating, comment });
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Failed to submit review.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-display font-bold text-gray-900">How was your stay?</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{booking.roomName}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
+
+        <div className="mb-5">
+          <p className="text-sm font-medium text-gray-700 mb-3">Your Rating</p>
+          <StarRating value={rating} onChange={setRating} />
+          {rating > 0 && (
+            <p className="text-xs text-gray-400 mt-2">
+              {['','Terrible','Poor','Average','Good','Excellent'][rating]}
+            </p>
+          )}
+        </div>
+
+        <div className="mb-5">
+          <label className="text-sm font-medium text-gray-700 mb-2 block">
+            Your Review <span className="font-normal text-gray-400">(optional)</span>
+          </label>
+          <textarea rows={4} value={comment} onChange={e => setComment(e.target.value)}
+            placeholder="Share your experience at Oceano Con Vista..."
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ocean-500" />
+        </div>
+
+        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+            Skip for now
+          </button>
+          <button onClick={handleSubmit} disabled={loading}
+            className="flex-1 py-2.5 bg-ocean-600 hover:bg-ocean-700 disabled:opacity-50 text-white rounded-xl text-sm font-medium transition-colors">
+            {loading ? 'Submitting...' : 'Submit Review'}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// ── Main Component ────────────────────────────────────────────────────────────
 const GuestDashboard = () => {
   const { user } = useAuth();
-  const [bookings, setBookings] = useState([]);
-  const [loading,  setLoading]  = useState(true);
+  const [bookings,       setBookings]       = useState([]);
+  const [loading,        setLoading]        = useState(true);
+  const [reviewedIds,    setReviewedIds]     = useState([]);
+  const [reviewBooking,  setReviewBooking]   = useState(null);
 
   useEffect(() => {
     bookingsAPI.getUserBookings()
       .then(data => setBookings(data.bookings || []))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    reviewsAPI.getUserReviews()
+      .then(data => setReviewedIds((data.reviews || []).map(r => r.booking_id)))
+      .catch(() => {});
   }, []);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  // Auto-show review popup for most recent checked-out booking not yet reviewed
+  useEffect(() => {
+    if (loading) return;
+    const checkedOut = bookings.filter(b => b.status === 'checked-out' && !reviewedIds.includes(b.id));
+    if (checkedOut.length > 0) {
+      const shown = sessionStorage.getItem('reviewShown');
+      if (!shown) {
+        setReviewBooking(checkedOut[0]);
+        sessionStorage.setItem('reviewShown', 'true');
+      }
+    }
+  }, [bookings, reviewedIds, loading]);
 
-  const upcoming  = bookings.filter(b => b.checkIn >= todayStr && !['cancelled','checked-out'].includes(b.status));
-  const completed = bookings.filter(b => b.status === 'checked-out');
-  const totalSpent = bookings
-    .filter(b => b.status !== 'cancelled')
-    .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+  const handleReviewSubmit = async ({ bookingId, roomId, roomName, rating, comment }) => {
+    await reviewsAPI.create({ bookingId, roomId, roomName, guestName: user?.name, rating, comment });
+    setReviewedIds(prev => [...prev, bookingId]);
+  };
 
+  const todayStr   = new Date().toISOString().split('T')[0];
+  const upcoming   = bookings.filter(b => b.checkIn >= todayStr && !['cancelled','checked-out'].includes(b.status));
+  const completed  = bookings.filter(b => b.status === 'checked-out');
+  const totalSpent = bookings.filter(b => b.status !== 'cancelled').reduce((sum, b) => sum + (b.totalPrice || 0), 0);
   const nextBooking = upcoming.sort((a, b) => a.checkIn.localeCompare(b.checkIn))[0];
 
   const stats = [
@@ -58,6 +162,17 @@ const GuestDashboard = () => {
 
   return (
     <DashboardLayout publicMenuItems={publicMenuItems} dashboardMenuItems={dashboardMenuItems}>
+
+      {/* Review Popup */}
+      <AnimatePresence>
+        {reviewBooking && (
+          <ReviewModal
+            booking={reviewBooking}
+            onClose={() => setReviewBooking(null)}
+            onSubmit={handleReviewSubmit}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Header */}
       <div className="mb-6 sm:mb-8">
@@ -171,6 +286,20 @@ const GuestDashboard = () => {
         </motion.div>
       )}
 
+      {/* Pending reviews banner */}
+      {!loading && bookings.filter(b => b.status === 'checked-out' && !reviewedIds.includes(b.id)).length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+          className="mt-6 bg-yellow-50 border border-yellow-200 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Star className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+            <p className="text-sm text-yellow-800 font-medium">You have stays waiting for a review!</p>
+          </div>
+          <Link to="/dashboard/reviews" className="text-xs font-semibold text-yellow-700 underline whitespace-nowrap">
+            Leave a Review
+          </Link>
+        </motion.div>
+      )}
+
       {!loading && bookings.length === 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
           className="mt-6 sm:mt-8 bg-white rounded-2xl border border-dashed border-gray-300 p-8 sm:p-10 text-center">
@@ -182,7 +311,6 @@ const GuestDashboard = () => {
           </Link>
         </motion.div>
       )}
-
     </DashboardLayout>
   );
 };

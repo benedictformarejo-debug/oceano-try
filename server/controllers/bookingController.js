@@ -11,19 +11,36 @@ const generateRefCode = () => {
 
 const sendConfirmationEmail = async (booking) => {
   try {
+    const nights = Math.ceil((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24));
+    
+    const formatTime = (t) => {
+      if (!t) return '2:00 PM';
+      const [h] = t.split(':');
+      const hour = parseInt(h);
+      return `${hour % 12 || 12}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
+    };
+
+    const isDownpayment = booking.paymentType === 'downpayment';
+    const downpaymentAmount = Math.round(Number(booking.totalPrice) * 0.5);
+    const remainingAmount   = Number(booking.totalPrice) - downpaymentAmount;
+
+    const manageUrl = `https://yourdomain.com/manage-booking`; // ← change to your real URL when live
+
     await resend.emails.send({
-      from:    'Oceano Con Vista <no-reply@oceanoconvista.com>',
+      from:    'Oceano Con Vista <onboarding@resend.dev>',
       to:      booking.email,
       subject: `Booking Confirmation – ${booking.refCode}`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:auto;padding:32px;border:1px solid #e5e7eb;border-radius:12px;">
           <h2 style="color:#0e7490;margin-bottom:4px;">Booking Confirmed! 🎉</h2>
           <p style="color:#6b7280;margin-bottom:24px;">Thank you for choosing Oceano Con Vista, ${booking.fullName}!</p>
+
           <div style="background:#f0f9ff;border-radius:8px;padding:16px;margin-bottom:24px;text-align:center;">
             <p style="color:#6b7280;font-size:12px;margin:0 0 4px;">Your Booking Reference</p>
             <p style="color:#0e7490;font-size:28px;font-weight:bold;margin:0;letter-spacing:2px;">${booking.refCode}</p>
             <p style="color:#9ca3af;font-size:11px;margin:8px 0 0;">Keep this code to manage your booking</p>
           </div>
+
           <table style="width:100%;border-collapse:collapse;font-size:14px;">
             <tr style="border-bottom:1px solid #f3f4f6;">
               <td style="padding:10px 0;color:#6b7280;">Room</td>
@@ -38,17 +55,48 @@ const sendConfirmationEmail = async (booking) => {
               <td style="padding:10px 0;font-weight:600;text-align:right;">${booking.checkOut}</td>
             </tr>
             <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:10px 0;color:#6b7280;">Arrival Time</td>
+              <td style="padding:10px 0;font-weight:600;text-align:right;">${formatTime(booking.arrivalTime)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:10px 0;color:#6b7280;">Duration</td>
+              <td style="padding:10px 0;font-weight:600;text-align:right;">${nights} ${nights === 1 ? 'Night' : 'Nights'}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f3f4f6;">
               <td style="padding:10px 0;color:#6b7280;">Guests</td>
               <td style="padding:10px 0;font-weight:600;text-align:right;">${booking.guests}</td>
             </tr>
-            <tr>
-              <td style="padding:10px 0;color:#6b7280;">Total</td>
-              <td style="padding:10px 0;font-weight:700;color:#0e7490;text-align:right;">₱${Number(booking.totalPrice).toLocaleString()}</td>
+            <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:10px 0;color:#6b7280;">Total Amount</td>
+              <td style="padding:10px 0;font-weight:600;text-align:right;">₱${Number(booking.totalPrice).toLocaleString()}</td>
             </tr>
+            ${isDownpayment ? `
+            <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:10px 0;color:#6b7280;">Downpayment (50%)</td>
+              <td style="padding:10px 0;font-weight:700;color:#059669;text-align:right;">₱${downpaymentAmount.toLocaleString()}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f3f4f6;">
+              <td style="padding:10px 0;color:#6b7280;">Remaining on Arrival</td>
+              <td style="padding:10px 0;font-weight:700;color:#dc2626;text-align:right;">₱${remainingAmount.toLocaleString()}</td>
+            </tr>
+            ` : `
+            <tr>
+              <td style="padding:10px 0;color:#6b7280;">Payment</td>
+              <td style="padding:10px 0;font-weight:700;color:#0e7490;text-align:right;">Full Payment ✓</td>
+            </tr>
+            `}
           </table>
-          <div style="margin-top:24px;padding:16px;background:#fefce8;border-radius:8px;font-size:13px;color:#92400e;">
-            💡 To view or cancel your booking, visit our website and click <strong>"Manage Booking"</strong> — enter your reference code and email.
+
+          ${isDownpayment ? `
+          <div style="margin-top:16px;padding:14px;background:#fef2f2;border-radius:8px;font-size:13px;color:#dc2626;border:1px solid #fecaca;">
+            ⚠️ <strong>Outstanding Balance:</strong> Please pay ₱${remainingAmount.toLocaleString()} upon arrival to complete your booking.
           </div>
+          ` : ''}
+
+          <div style="margin-top:16px;padding:14px;background:#fefce8;border-radius:8px;font-size:13px;color:#92400e;">
+            💡 To view or cancel your booking, <a href="${manageUrl}?ref=${booking.refCode}&email=${encodeURIComponent(booking.email)}" style="color:#0e7490;font-weight:bold;">click here to manage your booking</a> — or visit our website and click <strong>"Manage Booking"</strong>.
+          </div>
+
           <p style="margin-top:24px;font-size:12px;color:#9ca3af;text-align:center;">
             Oceano Con Vista · We look forward to hosting you!
           </p>
@@ -102,7 +150,7 @@ export const createBooking = async (req, res) => {
     }
 
     if (email) {
-      await sendConfirmationEmail({ fullName, email, roomName, checkIn, checkOut, guests, totalPrice, refCode });
+      await sendConfirmationEmail({ fullName, email, roomName, checkIn, checkOut, guests, totalPrice, refCode, arrivalTime, paymentType });
     }
 
     res.status(201).json({

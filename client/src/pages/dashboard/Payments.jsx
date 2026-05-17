@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { CreditCard, Calendar, CheckCircle } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { bookingsAPI } from '../../services/api';
-import { Home as HomeIcon, Info, Bed, Image, Mail, BookOpen } from 'lucide-react';
+import { Home as HomeIcon, Info, Bed, Image, Star, Mail, BookOpen } from 'lucide-react';
 
 const publicMenuItems = [
   { path: '/',        label: 'Home',    icon: HomeIcon },
@@ -17,6 +17,7 @@ const dashboardMenuItems = [
   { path: '/dashboard',          label: 'Overview',    icon: HomeIcon  },
   { path: '/dashboard/bookings', label: 'My Bookings', icon: BookOpen  },
   { path: '/dashboard/payments', label: 'Payments',    icon: CreditCard},
+  { path: '/dashboard/reviews', label: 'My Reviews',   icon: Star      },
 ];
 
 const statusStyles = {

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -26,6 +26,8 @@ import ManageBooking from './pages/ManageBooking';
 import GuestDashboard from './pages/dashboard/GuestDashboard';
 import MyBookings from './pages/dashboard/MyBookings';
 import Payments from './pages/dashboard/Payments';
+import GuestReviews from './pages/dashboard/GuestReviews';
+
 
 // Staff Dashboard
 import StaffDashboard from './pages/staff/StaffDashboard';
@@ -43,13 +45,24 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminFinance from './pages/admin/AdminFinance';
 import AdminReports from './pages/admin/AdminReports';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminReviews from './pages/admin/AdminReviews';
+
+
+
+// Add this small wrapper component above App()
+function ChatbotWrapper() {
+  const { pathname } = useLocation();
+  const hidden = pathname.startsWith('/admin') || pathname.startsWith('/staff');
+  if (hidden) return null;
+  return <HotelChatbot />;
+}
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <ScrollToTop />
-        <HotelChatbot />  {/* ← ADD IT HERE */}
+        <ChatbotWrapper />
         <Routes>
           {/* Public Routes - WITH Navbar + Footer */}
           <Route path="/" element={
@@ -126,6 +139,11 @@ function App() {
               <Payments />
             </ProtectedRoute>
           } />
+          <Route path="/dashboard/reviews" element={
+            <ProtectedRoute requiredRole="guest">
+              <GuestReviews />
+            </ProtectedRoute>
+          } />
 
           {/* Staff Dashboard */}
           <Route path="/staff" element={
@@ -169,6 +187,9 @@ function App() {
           <Route path="/admin/settings" element={
             <ProtectedRoute requiredRole="admin"><AdminSettings /></ProtectedRoute>
           } />
+          <Route path="/admin/reviews" element={
+            <ProtectedRoute requiredRole="admin"><AdminReviews /></ProtectedRoute>
+            } />
         </Routes>
       </Router>
     </AuthProvider>

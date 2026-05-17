@@ -4,13 +4,14 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Search, DollarSign, CreditCard, AlertCircle, Filter, ChevronDown } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { bookingsAPI } from '../../services/api';
-import { Home, CalendarDays, BedDouble, Users, FileText, Settings, Wallet } from 'lucide-react';
+import { Home, CalendarDays, BedDouble, Users, Star, FileText, Settings, Wallet } from 'lucide-react';
 
 const menuItems = [
   { path: '/admin',              label: 'Overview',        icon: Home        },
   { path: '/admin/reservations', label: 'Reservations',    icon: CalendarDays},
   { path: '/admin/rooms',        label: 'Room Management', icon: BedDouble   },
   { path: '/admin/users',        label: 'User Management', icon: Users       },
+  { path: '/admin/reviews',      label: 'Reviews',         icon: Star        },
   { path: '/admin/finance',      label: 'Finance',         icon: Wallet      },
   { path: '/admin/reports',      label: 'Reports',         icon: FileText    },
   { path: '/admin/settings',     label: 'Settings',        icon: Settings    },

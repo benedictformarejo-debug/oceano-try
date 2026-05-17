@@ -7,7 +7,7 @@ import { bookingsAPI } from '../../services/api';
 import {
   TrendingUp, DollarSign, Users, Calendar,
   BedDouble, CalendarDays, Home, Wallet,
-  FileText, Settings, ArrowRight
+  FileText, Settings, Star, ArrowRight
 } from 'lucide-react';
 
 const menuItems = [
@@ -15,6 +15,7 @@ const menuItems = [
   { path: '/admin/reservations', label: 'Reservations',    icon: CalendarDays},
   { path: '/admin/rooms',        label: 'Room Management', icon: BedDouble   },
   { path: '/admin/users',        label: 'User Management', icon: Users       },
+  { path: '/admin/reviews',      label: 'Reviews',         icon: Star        },
   { path: '/admin/finance',      label: 'Finance',         icon: Wallet      },
   { path: '/admin/reports',      label: 'Reports',         icon: FileText    },
   { path: '/admin/settings',     label: 'Settings',        icon: Settings    },

@@ -100,7 +100,7 @@ const LoginForm = ({ onSubmit, error }) => {
           </div>
         </div>
 
-        <Button type="submit" variant="primary" className="w-full flex items-center justify-center space-x-2">
+        <Button type="submit" variant="solid" size="lg" className="w-full">
           <LogIn className="w-5 h-5" />
           <span>Sign In</span>
         </Button>

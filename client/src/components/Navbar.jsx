@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, LayoutDashboard, LogOut, Home, Users, BedDouble, Image, Mail, CalendarCheck } from 'lucide-react';
 import { useNavbarScroll } from '../hooks/useNavbarScroll';
 import { useAuth } from '../context/AuthContext';
+import Button from './Button';
 
 const NAV_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Josefin+Sans:wght@200;300;400;700&display=swap');
@@ -35,43 +36,6 @@ const NAV_CSS = `
     letter-spacing: 0.05em;
   }
 
-  .ocv-rule {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(180,155,100,0.5) 30%, rgba(180,155,100,0.5) 70%, transparent 100%);
-    transition: opacity 0.3s ease;
-  }
-
-  .ocv-book-btn {
-    font-family: 'Josefin Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    padding: 9px 22px;
-    border: 1px solid;
-    position: relative;
-    overflow: hidden;
-    transition: color 0.3s ease;
-    background: transparent;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .ocv-book-btn::before {
-    content: '';
-    position: absolute; inset: 0;
-    transform: translateX(-101%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .ocv-book-btn:hover::before { transform: translateX(0); }
-  .ocv-book-btn span { position: relative; z-index: 1; }
-  .ocv-book-transparent { border-color: rgba(255,255,255,0.6); color: white; }
-  .ocv-book-transparent::before { background: white; }
-  .ocv-book-transparent:hover { color: #0a1a2e; }
-  .ocv-book-solid { border-color: #b49b64; color: #b49b64; }
-  .ocv-book-solid::before { background: #b49b64; }
-  .ocv-book-solid:hover { color: white; }
 
   .ocv-shadow-text {
     text-shadow: 0 1px 12px rgba(0,0,0,0.5), 0 0px 3px rgba(0,0,0,0.4);
@@ -141,7 +105,7 @@ const Navbar = () => {
   const hiddenRoutes = ['/dashboard', '/admin', '/staff'];
   if (hiddenRoutes.some(r => location.pathname.startsWith(r))) return null;
 
-  const transparentPages = ['/', '/about', '/rooms'];
+  const transparentPages = ['/'];
   const isTransparent = transparentPages.includes(location.pathname) && !isScrolled;
 
   const navLinks = [
@@ -172,13 +136,13 @@ const Navbar = () => {
 
         <div className="absolute inset-0 pointer-events-none transition-all duration-300"
           style={{
-            backgroundColor: isTransparent ? 'rgba(10,26,46,0)' : 'rgba(250,248,244,0.98)',
+            backgroundColor: isTransparent ? 'rgba(10,26,46,0)' : 'rgba(255,255,255,0.65)',
             backdropFilter: isTransparent ? 'none' : 'blur(12px)',
+            borderBottom: 'none',
           }} />
         <motion.div initial={false} animate={{ opacity: isTransparent ? 1 : 0 }} transition={{ duration: 0.4 }}
           className="absolute inset-0 pointer-events-none"
           style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.18) 75%, transparent 100%)' }} />
-        <motion.div className="ocv-rule" animate={{ opacity: isTransparent ? 0 : 1 }} transition={{ duration: 0.4 }} />
 
         {/* Desktop */}
         <div className="relative h-full max-w-screen-xl mx-auto px-6 hidden lg:grid"
@@ -192,8 +156,6 @@ const Navbar = () => {
               <span className={`ocv-brand transition-colors duration-300 select-none ${isTransparent ? 'text-white ocv-shadow-text' : 'text-stone-900'}`}
                 style={{ fontSize: 22, lineHeight: 1 }}>Oceano Con Vista</span>
             </div>
-            <motion.span style={{ display: 'block', height: 2, marginTop: 5, background: 'linear-gradient(90deg, #b49b64, transparent)', width: '50%' }}
-              animate={{ opacity: isTransparent ? 0.5 : 0.8 }} />
           </Link>
 
           <div className="flex items-center gap-8">
@@ -216,9 +178,9 @@ const Navbar = () => {
             ) : (
               <Link to="/login" className={`ocv-nav-link ${linkColor}`}>Login</Link>
             )}
-            <button onClick={handleBookNow} className={`ocv-book-btn ${isTransparent ? 'ocv-book-transparent' : 'ocv-book-solid'}`}>
-              <span>Book Now</span>
-            </button>
+            <Button onClick={handleBookNow} variant={isTransparent ? 'secondary' : 'primary'} size="md">
+              Book Now
+            </Button>
           </div>
         </div>
 
@@ -238,11 +200,9 @@ const Navbar = () => {
                 style={{ fontSize: 17, lineHeight: 1 }}>Oceano Con Vista</span>
             </Link>
           </div>
-          <button onClick={handleBookNow}
-            className={`ocv-book-btn flex-shrink-0 ${isTransparent ? 'ocv-book-transparent' : 'ocv-book-solid'}`}
-            style={{ padding: '7px 14px', fontSize: '10px' }}>
-            <span>Book Now</span>
-          </button>
+          <Button onClick={handleBookNow} variant={isTransparent ? 'secondary' : 'primary'} size="sm">
+            Book Now
+          </Button>
         </div>
       </nav>
 

@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
+const BG = '#f5f2ec';
+
 const faqs = [
   {
     q: 'How do I make a reservation?',
@@ -90,7 +92,7 @@ const AccordionFAQ = () => {
   const [openIndex, setOpenIndex] = useState(0);
 
   return (
-    <section style={{ background: '#fff', padding: '80px 52px' }}>
+    <section style={{ background: BG, padding: '80px 52px' }}>
       <div style={{ maxWidth: 1152, margin: '0 auto' }}>
 
         <motion.div

@@ -4,7 +4,7 @@ import { Calendar, Users, X, ChevronLeft, ChevronRight, Edit2, Check, AlertCircl
 import { Link } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { bookingsAPI } from '../../services/api';
-import { Home as HomeIcon, Info, Bed, Image, Mail, BookOpen, CreditCard } from 'lucide-react';
+import { Home as HomeIcon, Info, Bed, Image, Mail, Star, BookOpen, CreditCard } from 'lucide-react';
 
 
 const formatTime = (t) => {
@@ -26,6 +26,7 @@ const dashboardMenuItems = [
   { path: '/dashboard',          label: 'Overview',    icon: HomeIcon  },
   { path: '/dashboard/bookings', label: 'My Bookings', icon: BookOpen  },
   { path: '/dashboard/payments', label: 'Payments',    icon: CreditCard},
+  { path: '/dashboard/reviews', label: 'My Reviews',   icon: Star      },
 ];
 
 const statusStyles = {

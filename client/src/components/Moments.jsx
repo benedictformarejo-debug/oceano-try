@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 
+const BG = '#f5f2ec';
+
 const Moments = () => {
   const images = [
     '/images/moment3.jpg',
@@ -52,8 +54,7 @@ const Moments = () => {
             flex-direction: column;
             gap: 24px;
             padding-right: 0;
-            padding-left: 0;   /* ← add this */
-
+            padding-left: 0;
           }
           .moments-left {
             flex: none;
@@ -68,7 +69,7 @@ const Moments = () => {
           .moments-grid {
             grid-template-columns: 1fr 1fr;
             gap: 6px;
-            width: 100%;       /* ← add this */
+            width: 100%;
           }
           .moments-img-wrap {
             height: 220px;
@@ -76,7 +77,7 @@ const Moments = () => {
         }
       `}</style>
 
-      <section style={{ background: '#fff', padding: '60px 24px' }}>
+      <section style={{ background: BG, padding: '60px 24px' }}>
         <div className="moments-wrapper">
 
           {/* ── Left: sticky text ── */}

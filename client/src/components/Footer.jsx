@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Instagram, Facebook, Twitter } from 'lucide-react';
+import { Instagram, Facebook, Twitter, Mail } from 'lucide-react';
+
+const BG = '#f5f2ec';
+
 
 const Footer = () => {
   const links = [
@@ -11,7 +14,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer style={{ background: '#fff', fontFamily: "'DM Sans', sans-serif", padding: '56px 24px 40px', textAlign: 'center' }}>
+    <footer style={{ background: BG, fontFamily: "'DM Sans', sans-serif", padding: '56px 24px 40px', textAlign: 'center', borderTop: '1px solid #d0d0d0' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap');
         .f-link { color: #1a2332; text-decoration: none; font-size: 1rem; font-weight: 500; display: inline-block; transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s; }
@@ -42,7 +45,7 @@ const Footer = () => {
 
       {/* Socials */}
 <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginBottom: 32 }}>
-  <a href="#" target="_blank" rel="noopener noreferrer" className="f-social"><Twitter size={22} /></a>
+  <a href="mailto:oceanoconvista@gmail.com" target="_blank" rel="noopener noreferrer" className="f-social"><Mail size={22} /></a>
   <a href="https://www.facebook.com/OceanoConVista" target="_blank" rel="noopener noreferrer" className="f-social"><Facebook size={22} /></a>
   <a href="#" target="_blank" rel="noopener noreferrer" className="f-social"><Instagram size={22} /></a>
 </div>

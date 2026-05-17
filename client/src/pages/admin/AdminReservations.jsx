@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Eye, Check, X, Trash2, ChevronDown } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
 import { bookingsAPI } from '../../services/api';
-import { Home, CalendarDays, BedDouble, Users, Wallet, FileText, Settings } from 'lucide-react';
+import { Home, CalendarDays, BedDouble, Users, Wallet, Star, FileText, Settings } from 'lucide-react';
 
 const menuItems = [
   { path: '/admin',              label: 'Overview',        icon: Home        },
   { path: '/admin/reservations', label: 'Reservations',    icon: CalendarDays},
   { path: '/admin/rooms',        label: 'Room Management', icon: BedDouble   },
   { path: '/admin/users',        label: 'User Management', icon: Users       },
+  { path: '/admin/reviews',      label: 'Reviews',         icon: Star        },
   { path: '/admin/finance',      label: 'Finance',         icon: Wallet      },
   { path: '/admin/reports',      label: 'Reports',         icon: FileText    },
   { path: '/admin/settings',     label: 'Settings',        icon: Settings    },
@@ -52,7 +53,7 @@ const AdminReservations = () => {
   const [filterStatus,  setFilterStatus]  = useState('all');
   const [selected,      setSelected]      = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [showFilters,   setShowFilters]   = useState(false);
+  const [showFilters,   setShowFilters]   = useState(true); // ← default true
 
   useEffect(() => { fetchBookings(); }, []);
 
@@ -107,7 +108,6 @@ const AdminReservations = () => {
     }
   };
 
-  // ── Shared action buttons (used in both modal and card) ────────────────
   const ActionButtons = ({ r }) => (
     <>
       {r.status === 'pending' && (
@@ -146,7 +146,6 @@ const AdminReservations = () => {
   return (
     <DashboardLayout dashboardMenuItems={menuItems}>
 
-      {/* ── Page heading ── */}
       <div className="mb-5">
         <h1 className="text-xl sm:text-2xl font-display font-bold text-gray-900">Reservations</h1>
         <p className="text-gray-500 text-sm mt-1">Manage all guest bookings</p>
@@ -175,10 +174,10 @@ const AdminReservations = () => {
             />
           </div>
 
-          {/* Mobile: toggle filter chips */}
+          {/* Filter toggle button — always visible on all screen sizes */}
           <button
             onClick={() => setShowFilters(v => !v)}
-            className={`sm:hidden flex items-center gap-1.5 px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
               filterStatus !== 'all'
                 ? 'bg-ocean-600 text-white border-ocean-600'
                 : 'bg-white border-gray-300 text-gray-600'
@@ -189,20 +188,7 @@ const AdminReservations = () => {
           </button>
         </div>
 
-        {/* Desktop: always-visible filter chips */}
-        <div className="hidden sm:flex items-center gap-2 flex-wrap">
-          <Filter className="w-4 h-4 text-gray-400 flex-shrink-0" />
-          {STATUS_FILTERS.map(s => (
-            <button key={s} onClick={() => setFilterStatus(s)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors whitespace-nowrap ${
-                filterStatus === s
-                  ? 'bg-ocean-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
-              }`}>{s}</button>
-          ))}
-        </div>
-
-        {/* Mobile: collapsible filter chips */}
+        {/* Filter chips — animated, open by default, chips don't close panel */}
         <AnimatePresence>
           {showFilters && (
             <motion.div
@@ -210,12 +196,12 @@ const AdminReservations = () => {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="sm:hidden overflow-hidden"
+              className="overflow-hidden"
             >
               <div className="flex flex-wrap gap-2 pt-1">
                 {STATUS_FILTERS.map(s => (
-                  <button key={s} onClick={() => { setFilterStatus(s); setShowFilters(false); }}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                  <button key={s} onClick={() => setFilterStatus(s)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors whitespace-nowrap ${
                       filterStatus === s
                         ? 'bg-ocean-600 text-white'
                         : 'bg-white border border-gray-300 text-gray-600 hover:bg-gray-50'
@@ -234,8 +220,7 @@ const AdminReservations = () => {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 {['Ref Code', 'Guest', 'Room', 'Check-In', 'Check-Out', 'Arrival', 'Total', 'Payment', 'Status', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                ))}
+<th key={h} className="text-left px-2 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -265,10 +250,9 @@ const AdminReservations = () => {
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{r.roomName || '—'}</td>
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{r.checkIn}</td>
                   <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{r.checkOut}</td>
-                  {/* ← ADD THIS HERE */}
-<td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-  {r.arrivalTime ? formatTime(r.arrivalTime) : '2:00 PM'}
-</td>
+                  <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                    {r.arrivalTime ? formatTime(r.arrivalTime) : '2:00 PM'}
+                  </td>
                   <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">₱{(r.totalPrice || 0).toLocaleString()}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${paymentStyles[r.paymentType] || 'bg-gray-100 text-gray-500'}`}>
@@ -320,7 +304,6 @@ const AdminReservations = () => {
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
             className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
-            {/* Card header */}
             <div className="flex items-start justify-between px-4 pt-4 pb-3 border-b border-gray-100">
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-gray-900 text-sm truncate">{r.fullName || '—'}</p>
@@ -334,36 +317,35 @@ const AdminReservations = () => {
               </div>
             </div>
 
-            {/* Card body */}
-<div className="px-4 py-3 grid grid-cols-2 gap-x-4 gap-y-2">
-  <div>
-    <p className="text-xs text-gray-400 mb-0.5">Room</p>
-    <p className="text-sm font-medium text-gray-800 truncate">{r.roomName || '—'}</p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-400 mb-0.5">Check-In</p>
-    <p className="text-sm text-gray-700">{r.checkIn}</p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-400 mb-0.5">Payment</p>
-    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${paymentStyles[r.paymentType] || 'bg-gray-100 text-gray-500'}`}>
-      {paymentLabel[r.paymentType] || r.paymentType || '—'}
-    </span>
-  </div>
-  <div>
-    <p className="text-xs text-gray-400 mb-0.5">Check-Out</p>
-    <p className="text-sm text-gray-700">{r.checkOut}</p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-400 mb-0.5">Total</p>
-    <p className="text-sm font-semibold text-green-700">₱{(r.totalPrice || 0).toLocaleString()}</p>
-  </div>
-  <div>
-    <p className="text-xs text-gray-400 mb-0.5">Arrival</p>
-    <p className="text-sm text-gray-700">{r.arrivalTime ? formatTime(r.arrivalTime) : '2:00 PM'}</p>
-  </div>
-</div>
-            {/* Card footer: inline actions + view button */}
+            <div className="px-4 py-3 grid grid-cols-2 gap-x-4 gap-y-2">
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">Room</p>
+                <p className="text-sm font-medium text-gray-800 truncate">{r.roomName || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">Check-In</p>
+                <p className="text-sm text-gray-700">{r.checkIn}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">Payment</p>
+                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${paymentStyles[r.paymentType] || 'bg-gray-100 text-gray-500'}`}>
+                  {paymentLabel[r.paymentType] || r.paymentType || '—'}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">Check-Out</p>
+                <p className="text-sm text-gray-700">{r.checkOut}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">Total</p>
+                <p className="text-sm font-semibold text-green-700">₱{(r.totalPrice || 0).toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">Arrival</p>
+                <p className="text-sm text-gray-700">{r.arrivalTime ? formatTime(r.arrivalTime) : '2:00 PM'}</p>
+              </div>
+            </div>
+
             <div className="px-4 pb-4 pt-2 space-y-2">
               <ActionButtons r={r} />
               <button
@@ -398,7 +380,6 @@ const AdminReservations = () => {
               className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col"
               style={{ maxHeight: '92dvh' }}
             >
-              {/* Modal header */}
               <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-gray-100 flex-shrink-0">
                 <div>
                   <h2 className="text-lg font-display font-bold text-gray-900">Booking Details</h2>
@@ -411,7 +392,6 @@ const AdminReservations = () => {
                 </button>
               </div>
 
-              {/* Scrollable body */}
               <div className="overflow-y-auto flex-1 px-5 sm:px-6 py-4">
                 <div className="space-y-0">
                   {[
@@ -442,7 +422,6 @@ const AdminReservations = () => {
                 </div>
               </div>
 
-              {/* Sticky action footer */}
               <div className="px-5 sm:px-6 py-4 border-t border-gray-100 flex-shrink-0 space-y-2.5">
                 {selected.status === 'pending' && (
                   <div className="flex gap-3">
